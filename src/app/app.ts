@@ -49,7 +49,7 @@ export class App {
   }
 
   flagUrl(code: string): string {
-    return `https://flagcdn.com/${code}.svg`;
+    return `flags/${code}.svg`;
   }
 
   formatArea(area: number): string {

@@ -35,6 +35,7 @@ const HARD_MULTIPLIER = 2;
 const NO_REPEAT = 25; // não repetir os últimos N países sorteados
 const ROUND_TIME = 30; // segundos por rodada no modo contra o tempo
 const TICK_MS = 200;
+const STORAGE_KEY = 'flaguess.stats.v1';
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -60,8 +61,18 @@ export class GameService {
   readonly lastPoints = signal(0);
   readonly lastTimeBonus = signal(0);
 
+  // ---- Recordes (persistidos no localStorage) ----
+  readonly recordScore = signal(0);
+  readonly recordStreak = signal(0);
+  readonly lifetimeSolved = signal(0);
+  readonly gamesPlayed = signal(0);
+
   private recent: string[] = [];
   private timerId: ReturnType<typeof setInterval> | null = null;
+
+  constructor() {
+    this.loadStats();
+  }
 
   /** Conjunto de países ativo (todos ou só a Copa). */
   private readonly pool = computed<Country[]>(() =>
@@ -139,6 +150,8 @@ export class GameService {
     this.round.set(0);
     this.solved.set(0);
     this.recent = [];
+    this.gamesPlayed.update((n) => n + 1);
+    this.persistStats();
     this.nextRound();
   }
 
@@ -173,6 +186,11 @@ export class GameService {
       this.solved.update((n) => n + 1);
       this.streak.update((s) => s + 1);
       this.bestStreak.update((b) => Math.max(b, this.streak()));
+      // Recordes vitalícios
+      this.lifetimeSolved.update((n) => n + 1);
+      this.recordScore.update((r) => Math.max(r, this.score()));
+      this.recordStreak.update((r) => Math.max(r, this.streak()));
+      this.persistStats();
       this.feedback.set('');
       this.status.set('correct');
       return;
@@ -221,6 +239,45 @@ export class GameService {
     if (this.timerId !== null) {
       clearInterval(this.timerId);
       this.timerId = null;
+    }
+  }
+
+  // ---- Persistência (localStorage) ----
+  resetStats(): void {
+    this.recordScore.set(0);
+    this.recordStreak.set(0);
+    this.lifetimeSolved.set(0);
+    this.gamesPlayed.set(0);
+    this.persistStats();
+  }
+
+  private loadStats(): void {
+    try {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      const s = JSON.parse(raw);
+      this.recordScore.set(Number(s.recordScore) || 0);
+      this.recordStreak.set(Number(s.recordStreak) || 0);
+      this.lifetimeSolved.set(Number(s.lifetimeSolved) || 0);
+      this.gamesPlayed.set(Number(s.gamesPlayed) || 0);
+    } catch {
+      // ignora dados corrompidos / localStorage indisponível
+    }
+  }
+
+  private persistStats(): void {
+    try {
+      localStorage.setItem(
+        STORAGE_KEY,
+        JSON.stringify({
+          recordScore: this.recordScore(),
+          recordStreak: this.recordStreak(),
+          lifetimeSolved: this.lifetimeSolved(),
+          gamesPlayed: this.gamesPlayed(),
+        }),
+      );
+    } catch {
+      // localStorage indisponível (ex.: navegação privada com cota zero)
     }
   }
 

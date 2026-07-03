@@ -45,29 +45,27 @@
 }
 
 .brand {
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
   cursor: pointer;
   user-select: none;
-}
-
-.globe {
-  font-size: 2.25rem;
-  filter: drop-shadow(0 4px 10px rgba(34, 211, 238, 0.4));
-}
-
-.brand-text h1 {
   margin: 0;
-  font-size: 1.4rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
+  /* o logo foi feito para fundo claro; plaquinha garante o contraste do wordmark */
+  background: #ffffff;
+  padding: 6px 13px;
+  border-radius: 14px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+  transition: transform 0.15s ease;
 }
 
-.tag {
-  margin: 0.1rem 0 0;
-  font-size: 0.78rem;
-  color: var(--muted);
+.brand:hover {
+  transform: translateY(-1px);
+}
+
+.logo {
+  height: 42px;
+  width: auto;
+  display: block;
 }
 
 .stats {
@@ -189,6 +187,51 @@
   margin: 1.25rem 0 0;
   font-size: 0.75rem;
   color: var(--muted);
+}
+
+/* ---------- Recordes ---------- */
+.records {
+  display: flex;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-bottom: 1.75rem;
+  flex-wrap: wrap;
+}
+
+.record {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--card-border);
+  border-radius: 14px;
+  padding: 0.6rem 1rem;
+  min-width: 92px;
+}
+
+.record-num {
+  display: block;
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--gold);
+}
+
+.record-lbl {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.link-reset {
+  background: none;
+  border: none;
+  color: var(--muted);
+  text-decoration: underline;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+}
+
+.link-reset:hover {
+  color: var(--danger);
 }
 
 /* ---------- Game ---------- */
@@ -629,8 +672,8 @@
 
 /* ---------- Responsivo ---------- */
 @media (max-width: 520px) {
-  .brand-text h1 {
-    font-size: 1.15rem;
+  .logo {
+    height: 36px;
   }
   .stat {
     min-width: 56px;

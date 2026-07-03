@@ -13,7 +13,10 @@ A cada tentativa errada, você ganha uma **dica** — e quanto menos dicas usar,
   - **🌫️ Difícil** — bandeira **borrada** (o desfoque diminui a cada dica) e **pontos em dobro**.
 - **Placar** com pontos, sequência de acertos (streak) e rodadas.
 - **Autocomplete** com todos os países para facilitar a digitação.
-- Funciona **offline** para os dados; as imagens das bandeiras vêm do `flagcdn.com`.
+- Funciona **100% offline**: dados dos países e imagens das bandeiras ficam no próprio
+  projeto (`public/flags/`, ~197 SVGs). As bandeiras são de domínio público, baixadas
+  originalmente do [flagcdn.com](https://flagcdn.com) (regenerável via `scripts/download-flags.js`).
+- **Recordes salvos** no navegador (localStorage): melhor pontuação, maior sequência e acertos totais.
 
 ## 🚀 Como rodar
 

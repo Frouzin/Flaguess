@@ -1,12 +1,8 @@
 <div class="app">
   <header class="topbar">
-    <div class="brand" (click)="backToMenu()" role="button" tabindex="0">
-      <span class="globe">🌍</span>
-      <div class="brand-text">
-        <h1>Adivinhe a Bandeira</h1>
-        <p class="tag">Descubra o país • cada erro revela uma dica</p>
-      </div>
-    </div>
+    <h1 class="brand" (click)="backToMenu()" role="button" tabindex="0" aria-label="Flaguess — voltar ao início">
+      <img class="logo" src="flaguess-logo-horizontal.svg" alt="Flaguess" />
+    </h1>
 
     @if (game.status() !== 'idle') {
       <div class="stats">
@@ -35,6 +31,23 @@
           Olhe a bandeira e digite o nome do país. A cada tentativa errada você ganha
           uma nova dica — mas quanto menos dicas usar, mais pontos leva!
         </p>
+
+        @if (game.gamesPlayed() > 0) {
+          <div class="records">
+            <div class="record">
+              <span class="record-num">{{ game.recordScore() }}</span>
+              <span class="record-lbl">recorde</span>
+            </div>
+            <div class="record">
+              <span class="record-num">🔥 {{ game.recordStreak() }}</span>
+              <span class="record-lbl">melhor sequência</span>
+            </div>
+            <div class="record">
+              <span class="record-num">{{ game.lifetimeSolved() }}</span>
+              <span class="record-lbl">acertos totais</span>
+            </div>
+          </div>
+        }
 
         <div class="difficulty-grid">
           <button
@@ -94,7 +107,14 @@
           Começar a jogar →
         </button>
 
-        <p class="menu-foot">194 países no total • 48 no Modo Copa • bandeiras em tempo real</p>
+        <p class="menu-foot">
+          194 países no total • 48 no Modo Copa
+          @if (game.gamesPlayed() > 0) {
+            • <button type="button" class="link-reset" (click)="game.resetStats()">
+              zerar recordes
+            </button>
+          }
+        </p>
       </section>
     } @else {
       <!-- ============ JOGO ============ -->
@@ -229,6 +249,6 @@
   </main>
 
   <footer class="foot">
-    Feito com Angular • dados de países offline • bandeiras via flagcdn.com
+    Feito com Angular • dados e bandeiras offline • bandeiras de domínio público (flagcdn)
   </footer>
 </div>
