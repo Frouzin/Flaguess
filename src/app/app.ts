@@ -13,11 +13,19 @@ export class App {
 
   /** Dificuldade escolhida na tela inicial (antes de começar). */
   readonly chosen = signal<Difficulty>('normal');
+  /** Modo Copa: só seleções da Copa do Mundo 2026. */
+  readonly copa = signal(false);
+  /** Contra o tempo: countdown por rodada. */
+  readonly timed = signal(false);
   /** Texto digitado pelo jogador. */
   readonly guessText = signal('');
 
   start(): void {
-    this.game.newGame(this.chosen());
+    this.game.newGame({
+      difficulty: this.chosen(),
+      countrySet: this.copa() ? 'worldcup' : 'all',
+      timed: this.timed(),
+    });
     this.guessText.set('');
   }
 

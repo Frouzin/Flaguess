@@ -60,11 +60,41 @@
           </button>
         </div>
 
+        <div class="toggles">
+          <button
+            type="button"
+            class="toggle"
+            [class.on]="copa()"
+            (click)="copa.set(!copa())"
+          >
+            <span class="toggle-emoji">🏆</span>
+            <span class="toggle-text">
+              <span class="toggle-name">Modo Copa</span>
+              <span class="toggle-desc">Só as 48 seleções da Copa 2026</span>
+            </span>
+            <span class="switch" [class.on]="copa()"></span>
+          </button>
+
+          <button
+            type="button"
+            class="toggle"
+            [class.on]="timed()"
+            (click)="timed.set(!timed())"
+          >
+            <span class="toggle-emoji">⏱️</span>
+            <span class="toggle-text">
+              <span class="toggle-name">Contra o tempo</span>
+              <span class="toggle-desc">30s por rodada + bônus de velocidade</span>
+            </span>
+            <span class="switch" [class.on]="timed()"></span>
+          </button>
+        </div>
+
         <button type="button" class="btn btn-primary btn-lg" (click)="start()">
           Começar a jogar →
         </button>
 
-        <p class="menu-foot">{{ game.allNames.length }} países • bandeiras em tempo real</p>
+        <p class="menu-foot">194 países no total • 48 no Modo Copa • bandeiras em tempo real</p>
       </section>
     } @else {
       <!-- ============ JOGO ============ -->
@@ -79,7 +109,17 @@
             <span class="badge badge-mode">
               {{ game.difficulty() === 'hard' ? '🌫️ Difícil' : '😌 Normal' }}
             </span>
+            @if (game.countrySet() === 'worldcup') {
+              <span class="badge badge-copa">🏆 Copa 2026</span>
+            }
           </div>
+
+          @if (game.timed() && game.status() === 'playing') {
+            <div class="timer" [class.low]="game.secondsLeft() <= 10">
+              <div class="timer-bar" [style.width.%]="game.timePercent()"></div>
+              <span class="timer-text">⏱️ {{ game.secondsLeft() }}s</span>
+            </div>
+          }
 
           <div class="flag-wrap">
             <img
@@ -103,7 +143,7 @@
                 (ngModelChange)="guessText.set($event)"
               />
               <datalist id="country-list">
-                @for (n of game.allNames; track n) {
+                @for (n of game.poolNames(); track n) {
                   <option [value]="n"></option>
                 }
               </datalist>
@@ -148,7 +188,14 @@
             <!-- RESULTADO -->
             <div class="result" [class.win]="game.status() === 'correct'">
               @if (game.status() === 'correct') {
-                <p class="result-tag win-tag">🎉 Acertou! +{{ game.lastPoints() }} pts</p>
+                <p class="result-tag win-tag">
+                  🎉 Acertou! +{{ game.lastPoints() }} pts
+                  @if (game.lastTimeBonus() > 0) {
+                    <span class="bonus">+{{ game.lastTimeBonus() }} ⏱️ bônus</span>
+                  }
+                </p>
+              } @else if (game.status() === 'timeout') {
+                <p class="result-tag lose-tag">⏰ Tempo esgotado! A resposta era...</p>
               } @else {
                 <p class="result-tag lose-tag">A resposta era...</p>
               }

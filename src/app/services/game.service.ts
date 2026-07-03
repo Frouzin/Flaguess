@@ -1,12 +1,20 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { COUNTRIES, Country } from '../data/countries';
+import { WORLD_CUP_2026 } from '../data/world-cup';
 
 export type Difficulty = 'normal' | 'hard';
-export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed';
+export type CountrySet = 'all' | 'worldcup';
+export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed' | 'timeout';
 
 export interface Hint {
   icon: string;
   text: string;
+}
+
+export interface GameOptions {
+  difficulty: Difficulty;
+  countrySet: CountrySet;
+  timed: boolean;
 }
 
 /** Remove acentos/pontuação e normaliza para comparar respostas. */
@@ -25,19 +33,23 @@ const HINT_PENALTY = 15;
 const MIN_POINTS = 20;
 const HARD_MULTIPLIER = 2;
 const NO_REPEAT = 25; // não repetir os últimos N países sorteados
+const ROUND_TIME = 30; // segundos por rodada no modo contra o tempo
+const TICK_MS = 200;
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
-  /** Todos os nomes (pt) para o autocomplete. */
-  readonly allNames = COUNTRIES.map((c) => c.name).sort((a, b) => a.localeCompare(b, 'pt'));
+  // ---- Configuração ----
+  readonly difficulty = signal<Difficulty>('normal');
+  readonly countrySet = signal<CountrySet>('all');
+  readonly timed = signal(false);
 
   // ---- Estado ----
-  readonly difficulty = signal<Difficulty>('normal');
   readonly status = signal<GameStatus>('idle');
   readonly current = signal<Country | null>(null);
   readonly attempts = signal(0); // tentativas erradas na rodada atual
   readonly wrongGuesses = signal<string[]>([]);
   readonly feedback = signal('');
+  readonly timeLeft = signal(ROUND_TIME);
 
   // ---- Placar ----
   readonly score = signal(0);
@@ -46,8 +58,22 @@ export class GameService {
   readonly round = signal(0);
   readonly solved = signal(0);
   readonly lastPoints = signal(0);
+  readonly lastTimeBonus = signal(0);
 
   private recent: string[] = [];
+  private timerId: ReturnType<typeof setInterval> | null = null;
+
+  /** Conjunto de países ativo (todos ou só a Copa). */
+  private readonly pool = computed<Country[]>(() =>
+    this.countrySet() === 'worldcup' ? WORLD_CUP_2026 : COUNTRIES,
+  );
+
+  /** Nomes do conjunto ativo, para o autocomplete. */
+  readonly poolNames = computed(() =>
+    this.pool()
+      .map((c) => c.name)
+      .sort((a, b) => a.localeCompare(b, 'pt')),
+  );
 
   /** Lista completa de dicas do país atual, em ordem de revelação. */
   readonly allHints = computed<Hint[]>(() => {
@@ -93,12 +119,20 @@ export class GameService {
     return Math.max(2, 14 - this.attempts() * 2);
   });
 
-  /** Pontos que a rodada atual valeria se acertada agora. */
+  /** Pontos que a rodada atual valeria se acertada agora (sem o bônus de tempo). */
   readonly potentialPoints = computed(() => this.pointsFor(this.attempts()));
 
+  /** Segundos restantes (arredondado para cima) e % da barra de tempo. */
+  readonly secondsLeft = computed(() => Math.max(0, Math.ceil(this.timeLeft())));
+  readonly timePercent = computed(() =>
+    Math.max(0, Math.min(100, (this.timeLeft() / ROUND_TIME) * 100)),
+  );
+
   // ---- Ações ----
-  newGame(difficulty: Difficulty): void {
-    this.difficulty.set(difficulty);
+  newGame(opts: GameOptions): void {
+    this.difficulty.set(opts.difficulty);
+    this.countrySet.set(opts.countrySet);
+    this.timed.set(opts.timed);
     this.score.set(0);
     this.streak.set(0);
     this.bestStreak.set(0);
@@ -109,13 +143,16 @@ export class GameService {
   }
 
   nextRound(): void {
+    this.stopTimer();
     this.attempts.set(0);
     this.wrongGuesses.set([]);
     this.feedback.set('');
     this.lastPoints.set(0);
+    this.lastTimeBonus.set(0);
     this.current.set(this.pickCountry());
     this.round.update((r) => r + 1);
     this.status.set('playing');
+    if (this.timed()) this.startTimer();
   }
 
   guess(raw: string): void {
@@ -127,9 +164,12 @@ export class GameService {
 
     const g = normalize(text);
     if (g === normalize(c.name) || g === normalize(c.nameEn)) {
-      const pts = this.pointsFor(this.attempts());
-      this.lastPoints.set(pts);
-      this.score.update((s) => s + pts);
+      this.stopTimer();
+      const base = this.pointsFor(this.attempts());
+      const bonus = this.timed() ? Math.round(this.timeLeft()) : 0;
+      this.lastPoints.set(base);
+      this.lastTimeBonus.set(bonus);
+      this.score.update((s) => s + base + bonus);
       this.solved.update((n) => n + 1);
       this.streak.update((s) => s + 1);
       this.bestStreak.update((b) => Math.max(b, this.streak()));
@@ -150,9 +190,38 @@ export class GameService {
 
   reveal(): void {
     if (this.status() !== 'playing') return;
+    this.stopTimer();
     this.streak.set(0);
     this.feedback.set('');
     this.status.set('revealed');
+  }
+
+  private onTimeout(): void {
+    this.stopTimer();
+    this.streak.set(0);
+    this.feedback.set('');
+    this.status.set('timeout');
+  }
+
+  // ---- Timer ----
+  private startTimer(): void {
+    this.timeLeft.set(ROUND_TIME);
+    this.timerId = setInterval(() => {
+      const next = this.timeLeft() - TICK_MS / 1000;
+      if (next <= 0) {
+        this.timeLeft.set(0);
+        this.onTimeout();
+      } else {
+        this.timeLeft.set(next);
+      }
+    }, TICK_MS);
+  }
+
+  private stopTimer(): void {
+    if (this.timerId !== null) {
+      clearInterval(this.timerId);
+      this.timerId = null;
+    }
   }
 
   private pointsFor(usedHints: number): number {
@@ -161,10 +230,11 @@ export class GameService {
   }
 
   private pickCountry(): Country {
+    const pool = this.pool();
     let pick: Country;
     do {
-      pick = COUNTRIES[Math.floor(Math.random() * COUNTRIES.length)];
-    } while (COUNTRIES.length > NO_REPEAT && this.recent.includes(pick.code));
+      pick = pool[Math.floor(Math.random() * pool.length)];
+    } while (pool.length > NO_REPEAT && this.recent.includes(pick.code));
     this.recent.push(pick.code);
     if (this.recent.length > NO_REPEAT) this.recent.shift();
     return pick;
