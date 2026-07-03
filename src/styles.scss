@@ -1,0 +1,20 @@
+/* Estilos globais */
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  background: #0f172a;
+}
+
+/* Deixa o dropdown do datalist mais legível em navegadores que o estilizam */
+input[list] {
+  color-scheme: dark;
+}

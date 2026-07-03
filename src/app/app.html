@@ -1,0 +1,187 @@
+<div class="app">
+  <header class="topbar">
+    <div class="brand" (click)="backToMenu()" role="button" tabindex="0">
+      <span class="globe">🌍</span>
+      <div class="brand-text">
+        <h1>Adivinhe a Bandeira</h1>
+        <p class="tag">Descubra o país • cada erro revela uma dica</p>
+      </div>
+    </div>
+
+    @if (game.status() !== 'idle') {
+      <div class="stats">
+        <div class="stat">
+          <span class="num">{{ game.score() }}</span>
+          <span class="lbl">pontos</span>
+        </div>
+        <div class="stat">
+          <span class="num">🔥 {{ game.streak() }}</span>
+          <span class="lbl">sequência</span>
+        </div>
+        <div class="stat">
+          <span class="num">{{ game.solved() }}/{{ game.round() }}</span>
+          <span class="lbl">acertos</span>
+        </div>
+      </div>
+    }
+  </header>
+
+  <main class="content">
+    <!-- ============ TELA INICIAL ============ -->
+    @if (game.status() === 'idle') {
+      <section class="menu">
+        <h2 class="menu-title">Qual é o país?</h2>
+        <p class="menu-sub">
+          Olhe a bandeira e digite o nome do país. A cada tentativa errada você ganha
+          uma nova dica — mas quanto menos dicas usar, mais pontos leva!
+        </p>
+
+        <div class="difficulty-grid">
+          <button
+            type="button"
+            class="diff-card"
+            [class.selected]="chosen() === 'normal'"
+            (click)="chosen.set('normal')"
+          >
+            <span class="diff-emoji">😌</span>
+            <span class="diff-name">Normal</span>
+            <span class="diff-desc">Bandeira nítida. Ideal para aprender.</span>
+          </button>
+
+          <button
+            type="button"
+            class="diff-card hard"
+            [class.selected]="chosen() === 'hard'"
+            (click)="chosen.set('hard')"
+          >
+            <span class="diff-emoji">🌫️</span>
+            <span class="diff-name">Difícil</span>
+            <span class="diff-desc">Bandeira borrada + pontos em dobro.</span>
+          </button>
+        </div>
+
+        <button type="button" class="btn btn-primary btn-lg" (click)="start()">
+          Começar a jogar →
+        </button>
+
+        <p class="menu-foot">{{ game.allNames.length }} países • bandeiras em tempo real</p>
+      </section>
+    } @else {
+      <!-- ============ JOGO ============ -->
+      @let country = game.current();
+      @if (country) {
+        <section class="game">
+          <div class="round-bar">
+            <span class="badge">Rodada {{ game.round() }}</span>
+            @if (game.status() === 'playing') {
+              <span class="badge badge-points">Vale {{ game.potentialPoints() }} pts</span>
+            }
+            <span class="badge badge-mode">
+              {{ game.difficulty() === 'hard' ? '🌫️ Difícil' : '😌 Normal' }}
+            </span>
+          </div>
+
+          <div class="flag-wrap">
+            <img
+              class="flag"
+              [src]="flagUrl(country.code)"
+              [style.filter]="'blur(' + game.blurPx() + 'px)'"
+              [alt]="game.status() === 'playing' ? 'Bandeira misteriosa' : 'Bandeira de ' + country.name"
+            />
+          </div>
+
+          @if (game.status() === 'playing') {
+            <form class="guess-form" (ngSubmit)="submit()">
+              <input
+                class="guess-input"
+                type="text"
+                name="guess"
+                list="country-list"
+                autocomplete="off"
+                placeholder="Digite o nome do país..."
+                [ngModel]="guessText()"
+                (ngModelChange)="guessText.set($event)"
+              />
+              <datalist id="country-list">
+                @for (n of game.allNames; track n) {
+                  <option [value]="n"></option>
+                }
+              </datalist>
+              <button type="submit" class="btn btn-primary">Chutar</button>
+            </form>
+
+            @if (game.feedback()) {
+              <p class="feedback">{{ game.feedback() }}</p>
+            }
+
+            <div class="hints">
+              @if (game.revealedHints().length === 0) {
+                <p class="hints-empty">
+                  💡 Ainda sem dicas. Errar uma tentativa revela a primeira!
+                </p>
+              } @else {
+                <p class="hints-label">Dicas ({{ game.revealedHints().length }}):</p>
+                <ul class="hints-list">
+                  @for (h of game.revealedHints(); track $index) {
+                    <li class="hint">
+                      <span class="hint-icon">{{ h.icon }}</span>
+                      <span>{{ h.text }}</span>
+                    </li>
+                  }
+                </ul>
+              }
+            </div>
+
+            @if (game.wrongGuesses().length) {
+              <div class="wrong">
+                <span class="wrong-label">Já tentou:</span>
+                @for (w of game.wrongGuesses(); track w) {
+                  <span class="chip">{{ w }}</span>
+                }
+              </div>
+            }
+
+            <button type="button" class="btn btn-ghost" (click)="game.reveal()">
+              Não sei — revelar resposta
+            </button>
+          } @else {
+            <!-- RESULTADO -->
+            <div class="result" [class.win]="game.status() === 'correct'">
+              @if (game.status() === 'correct') {
+                <p class="result-tag win-tag">🎉 Acertou! +{{ game.lastPoints() }} pts</p>
+              } @else {
+                <p class="result-tag lose-tag">A resposta era...</p>
+              }
+              <h2 class="result-name">{{ country.name }}</h2>
+
+              <div class="facts">
+                <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                <div class="fact"><span>🌍 Continente</span><b>{{ country.region }}</b></div>
+                @if (country.subregion) {
+                  <div class="fact"><span>📍 Região</span><b>{{ country.subregion }}</b></div>
+                }
+                @if (country.currency) {
+                  <div class="fact"><span>💰 Moeda</span><b>{{ country.currency }}</b></div>
+                }
+                <div class="fact"><span>📐 Área</span><b>{{ formatArea(country.area) }}</b></div>
+                @if (country.languages.length) {
+                  <div class="fact">
+                    <span>🗣️ Idiomas</span><b>{{ country.languages.join(', ') }}</b>
+                  </div>
+                }
+              </div>
+
+              <button type="button" class="btn btn-primary btn-lg" (click)="next()">
+                Próximo país →
+              </button>
+            </div>
+          }
+        </section>
+      }
+    }
+  </main>
+
+  <footer class="foot">
+    Feito com Angular • dados de países offline • bandeiras via flagcdn.com
+  </footer>
+</div>
