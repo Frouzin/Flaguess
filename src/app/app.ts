@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Difficulty, DailyResult, GameService } from './services/game.service';
+import { CountrySet, Difficulty, DailyResult, GameService } from './services/game.service';
 import { ConsentService } from './services/consent.service';
 import { SITE } from './site-config';
 
@@ -19,8 +19,8 @@ export class App {
 
   /** Dificuldade escolhida na tela inicial (antes de começar). */
   readonly chosen = signal<Difficulty>('normal');
-  /** Modo Copa: só seleções da Copa do Mundo 2026. */
-  readonly copa = signal(false);
+  /** Conjunto escolhido: todos os países, Copa 2026 ou estados do Brasil. */
+  readonly chosenSet = signal<CountrySet>('all');
   /** Contra o tempo: countdown por rodada. */
   readonly timed = signal(false);
   /** Texto digitado pelo jogador. */
@@ -36,10 +36,15 @@ export class App {
   start(): void {
     this.game.newGame({
       difficulty: this.chosen(),
-      countrySet: this.copa() ? 'worldcup' : 'all',
+      countrySet: this.chosenSet(),
       timed: this.timed(),
     });
     this.guessText.set('');
+  }
+
+  /** Liga/desliga um conjunto (clicar no ativo volta para "todos"). */
+  toggleSet(set: CountrySet): void {
+    this.chosenSet.set(this.chosenSet() === set ? 'all' : set);
   }
 
   submit(): void {

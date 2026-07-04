@@ -94,15 +94,29 @@
           <button
             type="button"
             class="toggle"
-            [class.on]="copa()"
-            (click)="copa.set(!copa())"
+            [class.on]="chosenSet() === 'worldcup'"
+            (click)="toggleSet('worldcup')"
           >
             <span class="toggle-emoji">🏆</span>
             <span class="toggle-text">
               <span class="toggle-name">Modo Copa</span>
               <span class="toggle-desc">Só as 48 seleções da Copa 2026</span>
             </span>
-            <span class="switch" [class.on]="copa()"></span>
+            <span class="switch" [class.on]="chosenSet() === 'worldcup'"></span>
+          </button>
+
+          <button
+            type="button"
+            class="toggle"
+            [class.on]="chosenSet() === 'brazil'"
+            (click)="toggleSet('brazil')"
+          >
+            <span class="toggle-emoji">🗺️</span>
+            <span class="toggle-text">
+              <span class="toggle-name">Estados do Brasil</span>
+              <span class="toggle-desc">Os 26 estados + DF pela bandeira</span>
+            </span>
+            <span class="switch" [class.on]="chosenSet() === 'brazil'"></span>
           </button>
 
           <button
@@ -125,7 +139,7 @@
         </button>
 
         <p class="menu-foot">
-          194 países no total • 48 no Modo Copa
+          194 países • 48 na Copa • 27 estados do Brasil
           @if (game.gamesPlayed() > 0) {
             • <button type="button" class="link-reset" (click)="game.resetStats()">
               zerar recordes
@@ -180,6 +194,9 @@
               </span>
               @if (game.countrySet() === 'worldcup') {
                 <span class="badge badge-copa">🏆 Copa 2026</span>
+              }
+              @if (game.countrySet() === 'brazil') {
+                <span class="badge badge-brazil">🗺️ Estados</span>
               }
             }
           </div>
@@ -272,19 +289,25 @@
               <h2 class="result-name">{{ country.name }}</h2>
 
               <div class="facts">
-                <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
-                <div class="fact"><span>🌍 Continente</span><b>{{ country.region }}</b></div>
-                @if (country.subregion) {
-                  <div class="fact"><span>📍 Região</span><b>{{ country.subregion }}</b></div>
-                }
-                @if (country.currency) {
-                  <div class="fact"><span>💰 Moeda</span><b>{{ country.currency }}</b></div>
-                }
-                <div class="fact"><span>📐 Área</span><b>{{ formatArea(country.area) }}</b></div>
-                @if (country.languages.length) {
-                  <div class="fact">
-                    <span>🗣️ Idiomas</span><b>{{ country.languages.join(', ') }}</b>
-                  </div>
+                @if (game.countrySet() === 'brazil') {
+                  <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  <div class="fact"><span>🧭 Região</span><b>{{ country.region }}</b></div>
+                  <div class="fact"><span>🔠 Sigla</span><b>{{ country.subregion }}</b></div>
+                } @else {
+                  <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  <div class="fact"><span>🌍 Continente</span><b>{{ country.region }}</b></div>
+                  @if (country.subregion) {
+                    <div class="fact"><span>📍 Região</span><b>{{ country.subregion }}</b></div>
+                  }
+                  @if (country.currency) {
+                    <div class="fact"><span>💰 Moeda</span><b>{{ country.currency }}</b></div>
+                  }
+                  <div class="fact"><span>📐 Área</span><b>{{ formatArea(country.area) }}</b></div>
+                  @if (country.languages.length) {
+                    <div class="fact">
+                      <span>🗣️ Idiomas</span><b>{{ country.languages.join(', ') }}</b>
+                    </div>
+                  }
                 }
               </div>
 

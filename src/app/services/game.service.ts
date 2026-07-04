@@ -1,9 +1,10 @@
 import { Injectable, computed, signal } from '@angular/core';
 import { COUNTRIES, Country } from '../data/countries';
 import { WORLD_CUP_2026 } from '../data/world-cup';
+import { BRAZIL_STATES } from '../data/states-br';
 
 export type Difficulty = 'normal' | 'hard';
-export type CountrySet = 'all' | 'worldcup';
+export type CountrySet = 'all' | 'worldcup' | 'brazil';
 export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed' | 'timeout' | 'daily-done';
 
 /** Resultado de cada bandeira no Desafio do dia. */
@@ -118,10 +119,17 @@ export class GameService {
     this.initDailyStatus();
   }
 
-  /** Conjunto de países ativo (todos ou só a Copa). */
-  private readonly pool = computed<Country[]>(() =>
-    this.countrySet() === 'worldcup' ? WORLD_CUP_2026 : COUNTRIES,
-  );
+  /** Conjunto ativo: todos os países, só a Copa, ou os estados do Brasil. */
+  private readonly pool = computed<Country[]>(() => {
+    switch (this.countrySet()) {
+      case 'worldcup':
+        return WORLD_CUP_2026;
+      case 'brazil':
+        return BRAZIL_STATES;
+      default:
+        return COUNTRIES;
+    }
+  });
 
   /** Nomes do conjunto ativo, para o autocomplete. */
   readonly poolNames = computed(() =>
@@ -134,6 +142,19 @@ export class GameService {
   readonly allHints = computed<Hint[]>(() => {
     const c = this.current();
     if (!c) return [];
+
+    // Estados do Brasil têm dicas próprias (região, letras, capital, sigla).
+    if (this.countrySet() === 'brazil') {
+      const initial = c.name.charAt(0).toUpperCase();
+      const letters = c.name.replace(/\s/g, '').length;
+      return [
+        { icon: '🧭', text: `Região: ${c.region}` },
+        { icon: '🔤', text: `Começa com "${initial}" e tem ${letters} letras` },
+        { icon: '🏛️', text: `Capital: ${c.capital}` },
+        { icon: '🔠', text: `Sigla: ${c.subregion}` },
+      ];
+    }
+
     const hints: Hint[] = [];
     hints.push({ icon: '🌍', text: `Continente: ${c.region}` });
     hints.push({ icon: '🧭', text: `Hemisfério ${c.hemisphere}` });
@@ -445,12 +466,15 @@ export class GameService {
 
   private pickCountry(): Country {
     const pool = this.pool();
+    // Janela de não-repetição proporcional ao tamanho do conjunto (evita
+    // repetir demais em conjuntos pequenos como os 27 estados).
+    const window = Math.min(NO_REPEAT, Math.floor(pool.length / 2));
     let pick: Country;
     do {
       pick = pool[Math.floor(Math.random() * pool.length)];
-    } while (pool.length > NO_REPEAT && this.recent.includes(pick.code));
+    } while (window > 0 && this.recent.includes(pick.code));
     this.recent.push(pick.code);
-    if (this.recent.length > NO_REPEAT) this.recent.shift();
+    if (this.recent.length > window) this.recent.shift();
     return pick;
   }
 }
