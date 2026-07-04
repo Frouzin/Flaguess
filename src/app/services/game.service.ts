@@ -5,7 +5,18 @@ import { BRAZIL_STATES } from '../data/states-br';
 
 export type Difficulty = 'normal' | 'hard';
 export type CountrySet = 'all' | 'worldcup' | 'brazil';
+/** Filtro por continente (só no conjunto mundial). O valor casa com `Country.region`. */
+export type Continent = 'all' | 'África' | 'Américas' | 'Ásia' | 'Europa' | 'Oceania';
 export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed' | 'timeout' | 'daily-done';
+
+/** Continentes selecionáveis, na ordem em que aparecem no menu. */
+export const CONTINENTS: { value: Continent; label: string; emoji: string }[] = [
+  { value: 'África', label: 'África', emoji: '🌍' },
+  { value: 'Américas', label: 'Américas', emoji: '🌎' },
+  { value: 'Ásia', label: 'Ásia', emoji: '🌏' },
+  { value: 'Europa', label: 'Europa', emoji: '🏰' },
+  { value: 'Oceania', label: 'Oceania', emoji: '🏝️' },
+];
 
 /** Resultado de cada bandeira no Desafio do dia. */
 export type DailyResult = 'hit' | 'hint' | 'miss';
@@ -38,6 +49,8 @@ export interface GameOptions {
   timed: boolean;
   /** Modo Capitais: adivinhar a capital em vez do nome do país/estado. */
   capitals: boolean;
+  /** Filtro por continente (só vale no conjunto mundial). */
+  continent: Continent;
 }
 
 /** Remove acentos/pontuação e normaliza para comparar respostas. */
@@ -70,6 +83,7 @@ export class GameService {
   readonly countrySet = signal<CountrySet>('all');
   readonly timed = signal(false);
   readonly capitals = signal(false);
+  readonly continent = signal<Continent>('all');
 
   // ---- Estado ----
   readonly status = signal<GameStatus>('idle');
@@ -135,12 +149,24 @@ export class GameService {
       default:
         base = COUNTRIES;
     }
+    // Filtro por continente: só se aplica ao mundo inteiro (Copa e Estados
+    // já são conjuntos regionais próprios).
+    const cont = this.continent();
+    if (this.countrySet() === 'all' && cont !== 'all') {
+      base = base.filter((c) => c.region === cont);
+    }
     // No modo Capitais, ignora entradas sem capital válida.
     if (this.capitals()) {
       return base.filter((c) => c.capital && c.capital !== '—');
     }
     return base;
   });
+
+  /** Quantos países há em um continente (feedback do filtro no menu). */
+  countForContinent(cont: Continent): number {
+    if (cont === 'all') return COUNTRIES.length;
+    return COUNTRIES.filter((c) => c.region === cont).length;
+  }
 
   /** Sugestões do autocomplete: capitais (modo Capitais) ou nomes. */
   readonly poolNames = computed(() => {
@@ -236,6 +262,7 @@ export class GameService {
     this.countrySet.set(opts.countrySet);
     this.timed.set(opts.timed);
     this.capitals.set(opts.capitals);
+    this.continent.set(opts.continent);
     this.score.set(0);
     this.streak.set(0);
     this.bestStreak.set(0);
@@ -332,6 +359,7 @@ export class GameService {
     this.timed.set(false);
     this.countrySet.set('all'); // o desafio sempre usa países (autocomplete correto)
     this.capitals.set(false); // desafio é sempre por nome
+    this.continent.set('all'); // desafio usa o mundo inteiro
     const list = this.pickDailyCountries(day);
     this.dailyList.set(list);
 

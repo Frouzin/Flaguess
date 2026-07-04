@@ -1,6 +1,13 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CountrySet, Difficulty, DailyResult, GameService } from './services/game.service';
+import {
+  CONTINENTS,
+  Continent,
+  CountrySet,
+  Difficulty,
+  DailyResult,
+  GameService,
+} from './services/game.service';
 import { ConsentService } from './services/consent.service';
 import { SITE } from './site-config';
 
@@ -25,6 +32,10 @@ export class App {
   readonly timed = signal(false);
   /** Modo Capitais: adivinhar a capital em vez do nome. */
   readonly chosenCapitals = signal(false);
+  /** Continente escolhido (só vale no conjunto mundial). */
+  readonly chosenContinent = signal<Continent>('all');
+  /** Continentes disponíveis para o seletor do menu. */
+  readonly continents = CONTINENTS;
   /** Texto digitado pelo jogador. */
   readonly guessText = signal('');
 
@@ -41,6 +52,8 @@ export class App {
       countrySet: this.chosenSet(),
       timed: this.timed(),
       capitals: this.chosenCapitals(),
+      // O filtro por continente só vale no conjunto mundial.
+      continent: this.chosenSet() === 'all' ? this.chosenContinent() : 'all',
     });
     this.guessText.set('');
   }
@@ -48,6 +61,12 @@ export class App {
   /** Liga/desliga um conjunto (clicar no ativo volta para "todos"). */
   toggleSet(set: CountrySet): void {
     this.chosenSet.set(this.chosenSet() === set ? 'all' : set);
+  }
+
+  /** Rótulo do badge de continente durante o jogo (vazio quando é o mundo todo). */
+  continentBadge(): string {
+    const c = this.continents.find((x) => x.value === this.game.continent());
+    return c ? `${c.emoji} ${c.label}` : '';
   }
 
   /** Placeholder do campo conforme o modo (capital / estado / país). */

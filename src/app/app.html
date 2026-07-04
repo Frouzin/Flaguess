@@ -148,6 +148,35 @@
           </button>
         </div>
 
+        @if (chosenSet() === 'all') {
+          <div class="continent-filter">
+            <p class="continent-label">🌐 Filtrar por continente</p>
+            <div class="continent-chips">
+              <button
+                type="button"
+                class="cont-chip"
+                [class.selected]="chosenContinent() === 'all'"
+                (click)="chosenContinent.set('all')"
+              >
+                🌎 Todos
+              </button>
+              @for (c of continents; track c.value) {
+                <button
+                  type="button"
+                  class="cont-chip"
+                  [class.selected]="chosenContinent() === c.value"
+                  (click)="chosenContinent.set(c.value)"
+                >
+                  {{ c.emoji }} {{ c.label }}
+                </button>
+              }
+            </div>
+            <p class="continent-count">
+              🚩 {{ game.countForContinent(chosenContinent()) }} bandeiras neste filtro
+            </p>
+          </div>
+        }
+
         <button type="button" class="btn btn-primary btn-lg" (click)="start()">
           Começar a jogar →
         </button>
@@ -214,6 +243,9 @@
               }
               @if (game.capitals()) {
                 <span class="badge badge-capitals">🏛️ Capitais</span>
+              }
+              @if (game.countrySet() === 'all' && game.continent() !== 'all') {
+                <span class="badge badge-continent">{{ continentBadge() }}</span>
               }
             }
           </div>

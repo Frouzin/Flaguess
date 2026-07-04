@@ -801,6 +801,52 @@
   transform: translateX(18px);
 }
 
+/* ---------- Filtro por continente ---------- */
+.continent-filter {
+  margin-bottom: 1.75rem;
+}
+
+.continent-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--muted);
+  margin: 0 0 0.6rem;
+}
+
+.continent-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.cont-chip {
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 0.45rem 0.85rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 2px solid var(--card-border);
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.16s ease;
+}
+
+.cont-chip:hover {
+  border-color: var(--accent);
+}
+
+.cont-chip.selected {
+  border-color: var(--accent);
+  background: rgba(34, 211, 238, 0.12);
+  color: var(--accent);
+}
+
+.continent-count {
+  font-size: 0.72rem;
+  color: var(--muted);
+  margin: 0.7rem 0 0;
+}
+
 /* ---------- Badge Copa ---------- */
 .badge-copa {
   color: var(--gold);
@@ -818,6 +864,12 @@
   color: var(--primary-hover);
   border-color: rgba(129, 140, 248, 0.5);
   background: rgba(129, 140, 248, 0.12);
+}
+
+.badge-continent {
+  color: var(--accent);
+  border-color: rgba(34, 211, 238, 0.45);
+  background: rgba(34, 211, 238, 0.1);
 }
 
 /* ---------- Timer (contra o tempo) ---------- */
