@@ -122,6 +122,20 @@
           <button
             type="button"
             class="toggle"
+            [class.on]="chosenCapitals()"
+            (click)="chosenCapitals.set(!chosenCapitals())"
+          >
+            <span class="toggle-emoji">🏛️</span>
+            <span class="toggle-text">
+              <span class="toggle-name">Modo Capitais</span>
+              <span class="toggle-desc">Adivinhe a capital, não o nome</span>
+            </span>
+            <span class="switch" [class.on]="chosenCapitals()"></span>
+          </button>
+
+          <button
+            type="button"
+            class="toggle"
             [class.on]="timed()"
             (click)="timed.set(!timed())"
           >
@@ -198,6 +212,9 @@
               @if (game.countrySet() === 'brazil') {
                 <span class="badge badge-brazil">🗺️ Estados</span>
               }
+              @if (game.capitals()) {
+                <span class="badge badge-capitals">🏛️ Capitais</span>
+              }
             }
           </div>
 
@@ -225,7 +242,7 @@
                 name="guess"
                 list="country-list"
                 autocomplete="off"
-                placeholder="Digite o nome do {{ itemNoun() }}..."
+                placeholder="{{ placeholderText() }}"
                 [ngModel]="guessText()"
                 (ngModelChange)="guessText.set($event)"
               />
@@ -282,19 +299,32 @@
                   }
                 </p>
               } @else if (game.status() === 'timeout') {
-                <p class="result-tag lose-tag">⏰ Tempo esgotado! A resposta era...</p>
+                <p class="result-tag lose-tag">
+                  ⏰ Tempo esgotado! {{ game.capitals() ? 'A capital era...' : 'A resposta era...' }}
+                </p>
               } @else {
-                <p class="result-tag lose-tag">A resposta era...</p>
+                <p class="result-tag lose-tag">
+                  {{ game.capitals() ? 'A capital era...' : 'A resposta era...' }}
+                </p>
               }
-              <h2 class="result-name">{{ country.name }}</h2>
+              @if (game.capitals()) {
+                <h2 class="result-name">{{ country.capital }}</h2>
+                <p class="result-sub">capital de {{ country.name }}</p>
+              } @else {
+                <h2 class="result-name">{{ country.name }}</h2>
+              }
 
               <div class="facts">
                 @if (game.countrySet() === 'brazil') {
-                  <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  @if (!game.capitals()) {
+                    <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  }
                   <div class="fact"><span>🧭 Região</span><b>{{ country.region }}</b></div>
                   <div class="fact"><span>🔠 Sigla</span><b>{{ country.subregion }}</b></div>
                 } @else {
-                  <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  @if (!game.capitals()) {
+                    <div class="fact"><span>🏛️ Capital</span><b>{{ country.capital }}</b></div>
+                  }
                   <div class="fact"><span>🌍 Continente</span><b>{{ country.region }}</b></div>
                   @if (country.subregion) {
                     <div class="fact"><span>📍 Região</span><b>{{ country.subregion }}</b></div>
@@ -313,7 +343,7 @@
 
               <div class="result-actions">
                 <button type="button" class="btn btn-primary btn-lg" (click)="next()">
-                  Próximo {{ itemNoun() }} →
+                  {{ nextLabel() }}
                 </button>
                 <button type="button" class="btn btn-share" (click)="shareScore()">
                   {{ shareCopied() ? '✅ Copiado!' : '📲 Compartilhar' }}

@@ -36,6 +36,8 @@ export interface GameOptions {
   difficulty: Difficulty;
   countrySet: CountrySet;
   timed: boolean;
+  /** Modo Capitais: adivinhar a capital em vez do nome do país/estado. */
+  capitals: boolean;
 }
 
 /** Remove acentos/pontuação e normaliza para comparar respostas. */
@@ -67,6 +69,7 @@ export class GameService {
   readonly difficulty = signal<Difficulty>('normal');
   readonly countrySet = signal<CountrySet>('all');
   readonly timed = signal(false);
+  readonly capitals = signal(false);
 
   // ---- Estado ----
   readonly status = signal<GameStatus>('idle');
@@ -121,27 +124,49 @@ export class GameService {
 
   /** Conjunto ativo: todos os países, só a Copa, ou os estados do Brasil. */
   private readonly pool = computed<Country[]>(() => {
+    let base: Country[];
     switch (this.countrySet()) {
       case 'worldcup':
-        return WORLD_CUP_2026;
+        base = WORLD_CUP_2026;
+        break;
       case 'brazil':
-        return BRAZIL_STATES;
+        base = BRAZIL_STATES;
+        break;
       default:
-        return COUNTRIES;
+        base = COUNTRIES;
     }
+    // No modo Capitais, ignora entradas sem capital válida.
+    if (this.capitals()) {
+      return base.filter((c) => c.capital && c.capital !== '—');
+    }
+    return base;
   });
 
-  /** Nomes do conjunto ativo, para o autocomplete. */
-  readonly poolNames = computed(() =>
-    this.pool()
-      .map((c) => c.name)
-      .sort((a, b) => a.localeCompare(b, 'pt')),
-  );
+  /** Sugestões do autocomplete: capitais (modo Capitais) ou nomes. */
+  readonly poolNames = computed(() => {
+    const items = this.capitals()
+      ? [...new Set(this.pool().map((c) => c.capital))]
+      : this.pool().map((c) => c.name);
+    return items.sort((a, b) => a.localeCompare(b, 'pt'));
+  });
 
   /** Lista completa de dicas do país atual, em ordem de revelação. */
   readonly allHints = computed<Hint[]>(() => {
     const c = this.current();
     if (!c) return [];
+
+    // Modo Capitais: as dicas levam até a capital.
+    if (this.capitals()) {
+      const cap = c.capital;
+      const initial = cap.charAt(0).toUpperCase();
+      const letters = cap.replace(/\s/g, '').length;
+      const isState = this.countrySet() === 'brazil';
+      return [
+        { icon: '🧭', text: isState ? `Região: ${c.region}` : `Continente: ${c.region}` },
+        { icon: '🏳️', text: `É a capital de ${c.name}` },
+        { icon: '🔤', text: `Começa com "${initial}" e tem ${letters} letras` },
+      ];
+    }
 
     // Estados do Brasil têm dicas próprias (região, letras, capital, sigla).
     if (this.countrySet() === 'brazil') {
@@ -210,6 +235,7 @@ export class GameService {
     this.difficulty.set(opts.difficulty);
     this.countrySet.set(opts.countrySet);
     this.timed.set(opts.timed);
+    this.capitals.set(opts.capitals);
     this.score.set(0);
     this.streak.set(0);
     this.bestStreak.set(0);
@@ -242,7 +268,7 @@ export class GameService {
     if (!c) return;
 
     const g = normalize(text);
-    if (g === normalize(c.name) || g === normalize(c.nameEn)) {
+    if (this.isCorrect(g, c)) {
       this.stopTimer();
       if (this.dailyActive()) {
         this.recordDaily(this.attempts() === 0 ? 'hit' : 'hint');
@@ -305,6 +331,7 @@ export class GameService {
     this.difficulty.set('normal');
     this.timed.set(false);
     this.countrySet.set('all'); // o desafio sempre usa países (autocomplete correto)
+    this.capitals.set(false); // desafio é sempre por nome
     const list = this.pickDailyCountries(day);
     this.dailyList.set(list);
 
@@ -458,6 +485,12 @@ export class GameService {
     } catch {
       // localStorage indisponível (ex.: navegação privada com cota zero)
     }
+  }
+
+  /** Resposta correta conforme o modo (capital ou nome). */
+  private isCorrect(g: string, c: Country): boolean {
+    if (this.capitals()) return g === normalize(c.capital);
+    return g === normalize(c.name) || g === normalize(c.nameEn);
   }
 
   private pointsFor(usedHints: number): number {

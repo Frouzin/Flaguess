@@ -23,6 +23,8 @@ export class App {
   readonly chosenSet = signal<CountrySet>('all');
   /** Contra o tempo: countdown por rodada. */
   readonly timed = signal(false);
+  /** Modo Capitais: adivinhar a capital em vez do nome. */
+  readonly chosenCapitals = signal(false);
   /** Texto digitado pelo jogador. */
   readonly guessText = signal('');
 
@@ -38,6 +40,7 @@ export class App {
       difficulty: this.chosen(),
       countrySet: this.chosenSet(),
       timed: this.timed(),
+      capitals: this.chosenCapitals(),
     });
     this.guessText.set('');
   }
@@ -47,9 +50,18 @@ export class App {
     this.chosenSet.set(this.chosenSet() === set ? 'all' : set);
   }
 
-  /** Substantivo do modo atual: "estado" no modo Brasil, senão "país". */
-  itemNoun(): string {
-    return this.game.countrySet() === 'brazil' ? 'estado' : 'país';
+  /** Placeholder do campo conforme o modo (capital / estado / país). */
+  placeholderText(): string {
+    if (this.game.capitals()) return 'Digite o nome da capital...';
+    return this.game.countrySet() === 'brazil'
+      ? 'Digite o nome do estado...'
+      : 'Digite o nome do país...';
+  }
+
+  /** Rótulo do botão "próximo" com o gênero certo. */
+  nextLabel(): string {
+    if (this.game.capitals()) return 'Próxima capital →';
+    return this.game.countrySet() === 'brazil' ? 'Próximo estado →' : 'Próximo país →';
   }
 
   submit(): void {

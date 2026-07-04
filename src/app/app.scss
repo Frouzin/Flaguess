@@ -471,6 +471,12 @@
   font-weight: 800;
 }
 
+.result-sub {
+  margin: -0.8rem 0 1.1rem;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
 .facts {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -806,6 +812,12 @@
   color: var(--accent-2);
   border-color: rgba(52, 211, 153, 0.45);
   background: rgba(52, 211, 153, 0.1);
+}
+
+.badge-capitals {
+  color: var(--primary-hover);
+  border-color: rgba(129, 140, 248, 0.5);
+  background: rgba(129, 140, 248, 0.12);
 }
 
 /* ---------- Timer (contra o tempo) ---------- */
