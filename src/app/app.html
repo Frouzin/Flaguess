@@ -225,7 +225,7 @@
                 name="guess"
                 list="country-list"
                 autocomplete="off"
-                placeholder="Digite o nome do país..."
+                placeholder="Digite o nome do {{ itemNoun() }}..."
                 [ngModel]="guessText()"
                 (ngModelChange)="guessText.set($event)"
               />
@@ -313,7 +313,7 @@
 
               <div class="result-actions">
                 <button type="button" class="btn btn-primary btn-lg" (click)="next()">
-                  Próximo país →
+                  Próximo {{ itemNoun() }} →
                 </button>
                 <button type="button" class="btn btn-share" (click)="shareScore()">
                   {{ shareCopied() ? '✅ Copiado!' : '📲 Compartilhar' }}

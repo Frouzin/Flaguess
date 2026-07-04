@@ -304,6 +304,7 @@ export class GameService {
     this.dailyActive.set(true);
     this.difficulty.set('normal');
     this.timed.set(false);
+    this.countrySet.set('all'); // o desafio sempre usa países (autocomplete correto)
     const list = this.pickDailyCountries(day);
     this.dailyList.set(list);
 

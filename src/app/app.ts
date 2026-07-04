@@ -47,6 +47,11 @@ export class App {
     this.chosenSet.set(this.chosenSet() === set ? 'all' : set);
   }
 
+  /** Substantivo do modo atual: "estado" no modo Brasil, senão "país". */
+  itemNoun(): string {
+    return this.game.countrySet() === 'brazil' ? 'estado' : 'país';
+  }
+
   submit(): void {
     const wasPlaying = this.game.status() === 'playing';
     this.game.guess(this.guessText());
