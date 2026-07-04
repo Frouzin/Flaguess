@@ -4,7 +4,27 @@ import { WORLD_CUP_2026 } from '../data/world-cup';
 
 export type Difficulty = 'normal' | 'hard';
 export type CountrySet = 'all' | 'worldcup';
-export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed' | 'timeout';
+export type GameStatus = 'idle' | 'playing' | 'correct' | 'revealed' | 'timeout' | 'daily-done';
+
+/** Resultado de cada bandeira no Desafio do dia. */
+export type DailyResult = 'hit' | 'hint' | 'miss';
+
+interface DailySave {
+  day: number;
+  results: DailyResult[];
+  done: boolean;
+}
+
+/** PRNG determinístico (mulberry32) — mesmo dia gera sempre as mesmas bandeiras. */
+function mulberry32(seed: number): () => number {
+  let a = seed >>> 0;
+  return () => {
+    a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
 
 export interface Hint {
   icon: string;
@@ -36,6 +56,9 @@ const NO_REPEAT = 25; // não repetir os últimos N países sorteados
 const ROUND_TIME = 30; // segundos por rodada no modo contra o tempo
 const TICK_MS = 200;
 const STORAGE_KEY = 'flaguess.stats.v1';
+const DAILY_KEY = 'flaguess.daily.v1';
+const DAILY_SIZE = 5; // bandeiras por Desafio do dia
+const DAILY_EPOCH = Date.UTC(2025, 0, 1); // dia 1 do Flaguess
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -67,11 +90,32 @@ export class GameService {
   readonly lifetimeSolved = signal(0);
   readonly gamesPlayed = signal(0);
 
+  // ---- Desafio do dia ----
+  readonly dailyActive = signal(false);
+  readonly dailyNumber = signal(0);
+  readonly dailyList = signal<Country[]>([]);
+  readonly dailyIndex = signal(0);
+  readonly dailyResults = signal<DailyResult[]>([]);
+  readonly dailyCompletedToday = signal(false);
+
+  /** Grade de emojis do resultado diário (🟩 de primeira, 🟨 com dica, ⬛ pulou). */
+  readonly dailyEmojis = computed(() =>
+    this.dailyResults()
+      .map((r) => (r === 'hit' ? '🟩' : r === 'hint' ? '🟨' : '⬛'))
+      .join(''),
+  );
+  /** Quantas bandeiras foram acertadas no desafio (com ou sem dica). */
+  readonly dailyScore = computed(
+    () => this.dailyResults().filter((r) => r !== 'miss').length,
+  );
+
   private recent: string[] = [];
   private timerId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.loadStats();
+    this.dailyNumber.set(this.computeDailyNumber());
+    this.initDailyStatus();
   }
 
   /** Conjunto de países ativo (todos ou só a Copa). */
@@ -141,6 +185,7 @@ export class GameService {
 
   // ---- Ações ----
   newGame(opts: GameOptions): void {
+    this.dailyActive.set(false);
     this.difficulty.set(opts.difficulty);
     this.countrySet.set(opts.countrySet);
     this.timed.set(opts.timed);
@@ -178,6 +223,10 @@ export class GameService {
     const g = normalize(text);
     if (g === normalize(c.name) || g === normalize(c.nameEn)) {
       this.stopTimer();
+      if (this.dailyActive()) {
+        this.recordDaily(this.attempts() === 0 ? 'hit' : 'hint');
+        return;
+      }
       const base = this.pointsFor(this.attempts());
       const bonus = this.timed() ? Math.round(this.timeLeft()) : 0;
       this.lastPoints.set(base);
@@ -209,6 +258,10 @@ export class GameService {
   reveal(): void {
     if (this.status() !== 'playing') return;
     this.stopTimer();
+    if (this.dailyActive()) {
+      this.recordDaily('miss');
+      return;
+    }
     this.streak.set(0);
     this.feedback.set('');
     this.status.set('revealed');
@@ -219,6 +272,110 @@ export class GameService {
     this.streak.set(0);
     this.feedback.set('');
     this.status.set('timeout');
+  }
+
+  // ---- Desafio do dia ----
+  /** Inicia (ou reabre) o desafio de hoje. Se já concluído, mostra o resultado. */
+  startDaily(): void {
+    this.stopTimer();
+    const day = this.computeDailyNumber();
+    this.dailyNumber.set(day);
+    this.dailyActive.set(true);
+    this.difficulty.set('normal');
+    this.timed.set(false);
+    const list = this.pickDailyCountries(day);
+    this.dailyList.set(list);
+
+    const saved = this.loadDaily();
+    if (saved && saved.day === day && saved.done) {
+      // Já jogou hoje: mostra o resultado salvo.
+      this.dailyResults.set(saved.results);
+      this.dailyIndex.set(list.length);
+      this.dailyCompletedToday.set(true);
+      this.status.set('daily-done');
+      return;
+    }
+
+    this.dailyResults.set([]);
+    this.dailyIndex.set(0);
+    this.attempts.set(0);
+    this.wrongGuesses.set([]);
+    this.feedback.set('');
+    this.current.set(list[0]);
+    this.status.set('playing');
+  }
+
+  private recordDaily(result: DailyResult): void {
+    this.dailyResults.update((r) => [...r, result]);
+    const next = this.dailyIndex() + 1;
+    if (next >= this.dailyList().length) {
+      this.dailyCompletedToday.set(true);
+      this.saveDaily();
+      this.status.set('daily-done');
+      return;
+    }
+    this.dailyIndex.set(next);
+    this.attempts.set(0);
+    this.wrongGuesses.set([]);
+    this.feedback.set('');
+    this.current.set(this.dailyList()[next]);
+    this.status.set('playing');
+  }
+
+  /** Número do desafio = dias desde a época do Flaguess. */
+  private computeDailyNumber(): number {
+    const now = new Date();
+    const todayUTC = Date.UTC(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.floor((todayUTC - DAILY_EPOCH) / 86_400_000) + 1;
+  }
+
+  /** Bandeiras determinísticas do dia (iguais para todos). */
+  private pickDailyCountries(day: number): Country[] {
+    const rng = mulberry32(Math.imul(day, 2_654_435_761));
+    const picked = new Set<number>();
+    const result: Country[] = [];
+    while (result.length < DAILY_SIZE && picked.size < COUNTRIES.length) {
+      const i = Math.floor(rng() * COUNTRIES.length);
+      if (!picked.has(i)) {
+        picked.add(i);
+        result.push(COUNTRIES[i]);
+      }
+    }
+    return result;
+  }
+
+  private initDailyStatus(): void {
+    const saved = this.loadDaily();
+    if (saved && saved.day === this.dailyNumber() && saved.done) {
+      this.dailyCompletedToday.set(true);
+    }
+  }
+
+  private loadDaily(): DailySave | null {
+    try {
+      const raw = localStorage.getItem(DAILY_KEY);
+      if (!raw) return null;
+      const s = JSON.parse(raw) as DailySave;
+      if (typeof s.day !== 'number' || !Array.isArray(s.results)) return null;
+      return s;
+    } catch {
+      return null;
+    }
+  }
+
+  private saveDaily(): void {
+    try {
+      localStorage.setItem(
+        DAILY_KEY,
+        JSON.stringify({
+          day: this.dailyNumber(),
+          results: this.dailyResults(),
+          done: true,
+        } satisfies DailySave),
+      );
+    } catch {
+      // localStorage indisponível — ignora.
+    }
   }
 
   // ---- Timer ----

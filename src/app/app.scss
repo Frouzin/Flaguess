@@ -871,3 +871,167 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ---------- Desafio do dia (menu) ---------- */
+.btn-daily {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  width: 100%;
+  text-align: left;
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(99, 102, 241, 0.14));
+  border-radius: 18px;
+  padding: 1rem 1.15rem;
+  cursor: pointer;
+  color: var(--text);
+  font-family: inherit;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease;
+  margin-bottom: 1.25rem;
+}
+
+.btn-daily:hover {
+  transform: translateY(-2px);
+  border-color: var(--gold);
+}
+
+.btn-daily-icon {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.btn-daily-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+}
+
+.btn-daily-title {
+  font-weight: 800;
+  font-size: 1.05rem;
+  color: var(--gold);
+}
+
+.btn-daily-sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+.btn-daily-arrow {
+  font-size: 1.3rem;
+  color: var(--gold);
+}
+
+.menu-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1.25rem;
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.menu-divider span {
+  white-space: nowrap;
+}
+
+.menu-divider::before,
+.menu-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--card-border);
+}
+
+.badge-daily {
+  background: rgba(251, 191, 36, 0.16);
+  color: var(--gold);
+}
+
+/* ---------- Resultado do Desafio ---------- */
+.daily-result {
+  text-align: center;
+}
+
+.daily-tag {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+.daily-emojis {
+  font-size: 2.2rem;
+  letter-spacing: 0.15rem;
+  margin: 0.5rem 0 0.75rem;
+}
+
+.daily-score {
+  font-size: 1.1rem;
+  margin: 0 0 1.25rem;
+}
+
+.daily-score b {
+  color: var(--accent-2);
+  font-size: 1.3rem;
+}
+
+.daily-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.daily-item {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 12px;
+  padding: 0.5rem 0.85rem;
+  text-align: left;
+}
+
+.daily-item-emoji {
+  font-size: 1.1rem;
+}
+
+.daily-flag {
+  width: 34px;
+  height: auto;
+  border-radius: 3px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+}
+
+.daily-item-name {
+  font-weight: 600;
+}
+
+.daily-note {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0.5rem 0 1rem;
+}
+
+/* ---------- Compartilhar ---------- */
+.result-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.btn-share {
+  background: var(--accent-2);
+  color: #04240f;
+}
+
+.btn-share:hover {
+  filter: brightness(1.08);
+  transform: translateY(-2px);
+}

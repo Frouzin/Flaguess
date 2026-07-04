@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Difficulty, GameService } from './services/game.service';
+import { Difficulty, DailyResult, GameService } from './services/game.service';
 import { ConsentService } from './services/consent.service';
 import { SITE } from './site-config';
 
@@ -30,6 +30,8 @@ export class App {
   readonly showDonate = signal(false);
   /** Feedback "copiado!" ao copiar a chave PIX. */
   readonly pixCopied = signal(false);
+  /** Feedback "copiado!" ao compartilhar (quando cai no clipboard). */
+  readonly shareCopied = signal(false);
 
   start(): void {
     this.game.newGame({
@@ -54,8 +56,15 @@ export class App {
     this.game.nextRound();
   }
 
+  startDaily(): void {
+    this.guessText.set('');
+    this.shareCopied.set(false);
+    this.game.startDaily();
+  }
+
   backToMenu(): void {
     this.guessText.set('');
+    this.game.dailyActive.set(false);
     this.game.status.set('idle');
   }
 
@@ -80,6 +89,50 @@ export class App {
       this.pixCopied.set(true);
     } catch {
       this.pixCopied.set(false);
+    }
+  }
+
+  /** Emoji do resultado de uma bandeira no desafio (para a lista do resultado). */
+  resultEmoji(r: DailyResult | undefined): string {
+    return r === 'hit' ? '🟩' : r === 'hint' ? '🟨' : '⬛';
+  }
+
+  /** Compartilha o resultado do Desafio do dia (grade de emojis). */
+  shareDaily(): void {
+    const g = this.game;
+    const text =
+      `🎌 Flaguess • Desafio #${g.dailyNumber()} — ${g.dailyScore()}/${g.dailyList().length}\n` +
+      `${g.dailyEmojis()}\n` +
+      `https://flaguess.com.br`;
+    this.doShare(text);
+  }
+
+  /** Compartilha o desempenho na partida livre. */
+  shareScore(): void {
+    const g = this.game;
+    const text =
+      `🎌 Flaguess — acertei ${g.solved()} bandeira${g.solved() === 1 ? '' : 's'} ` +
+      `(sequência de ${g.bestStreak()})! Consegue mais?\n` +
+      `https://flaguess.com.br`;
+    this.doShare(text);
+  }
+
+  /** Usa a Web Share API (mobile) e cai no clipboard como fallback (desktop). */
+  private async doShare(text: string): Promise<void> {
+    this.shareCopied.set(false);
+    try {
+      if (navigator.share) {
+        await navigator.share({ text });
+        return;
+      }
+    } catch {
+      // usuário cancelou ou API indisponível — tenta o clipboard abaixo.
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      this.shareCopied.set(true);
+    } catch {
+      // sem clipboard também — silencioso.
     }
   }
 

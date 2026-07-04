@@ -4,7 +4,7 @@
       <img class="logo" src="flaguess-logo-horizontal.svg" alt="Flaguess" />
     </h1>
 
-    @if (game.status() !== 'idle') {
+    @if (game.status() !== 'idle' && !game.dailyActive()) {
       <div class="stats">
         <div class="stat">
           <span class="num">{{ game.score() }}</span>
@@ -48,6 +48,23 @@
             </div>
           </div>
         }
+
+        <button type="button" class="btn-daily" (click)="startDaily()">
+          <span class="btn-daily-icon">🗓️</span>
+          <span class="btn-daily-text">
+            <span class="btn-daily-title">Desafio do dia #{{ game.dailyNumber() }}</span>
+            <span class="btn-daily-sub">
+              @if (game.dailyCompletedToday()) {
+                ✅ Concluído hoje — toque para ver seu resultado
+              } @else {
+                5 bandeiras, iguais para todo mundo. Volte todo dia!
+              }
+            </span>
+          </span>
+          <span class="btn-daily-arrow">→</span>
+        </button>
+
+        <p class="menu-divider"><span>ou jogue no modo livre</span></p>
 
         <div class="difficulty-grid">
           <button
@@ -121,16 +138,49 @@
       @let country = game.current();
       @if (country) {
         <section class="game">
+          @if (game.status() === 'daily-done') {
+            <!-- ============ RESULTADO DO DESAFIO DO DIA ============ -->
+            <div class="result daily-result">
+              <p class="result-tag daily-tag">🗓️ Desafio do dia #{{ game.dailyNumber() }}</p>
+              <div class="daily-emojis">{{ game.dailyEmojis() }}</div>
+              <p class="daily-score">
+                Você acertou <b>{{ game.dailyScore() }}</b> de {{ game.dailyList().length }}!
+              </p>
+
+              <div class="daily-list">
+                @for (c of game.dailyList(); track c.code; let i = $index) {
+                  <div class="daily-item">
+                    <span class="daily-item-emoji">{{ resultEmoji(game.dailyResults()[i]) }}</span>
+                    <img class="daily-flag" [src]="flagUrl(c.code)" alt="" />
+                    <span class="daily-item-name">{{ c.name }}</span>
+                  </div>
+                }
+              </div>
+
+              <button type="button" class="btn btn-primary btn-lg" (click)="shareDaily()">
+                {{ shareCopied() ? '✅ Copiado! Cole no WhatsApp' : '📲 Compartilhar resultado' }}
+              </button>
+              <p class="daily-note">🌅 Volte amanhã para um novo desafio!</p>
+              <button type="button" class="btn btn-ghost" (click)="backToMenu()">
+                Voltar ao menu
+              </button>
+            </div>
+          } @else {
           <div class="round-bar">
-            <span class="badge">Rodada {{ game.round() }}</span>
-            @if (game.status() === 'playing') {
-              <span class="badge badge-points">Vale {{ game.potentialPoints() }} pts</span>
-            }
-            <span class="badge badge-mode">
-              {{ game.difficulty() === 'hard' ? '🌫️ Difícil' : '😌 Normal' }}
-            </span>
-            @if (game.countrySet() === 'worldcup') {
-              <span class="badge badge-copa">🏆 Copa 2026</span>
+            @if (game.dailyActive()) {
+              <span class="badge badge-daily">🗓️ Desafio #{{ game.dailyNumber() }}</span>
+              <span class="badge">{{ game.dailyIndex() + 1 }} / {{ game.dailyList().length }}</span>
+            } @else {
+              <span class="badge">Rodada {{ game.round() }}</span>
+              @if (game.status() === 'playing') {
+                <span class="badge badge-points">Vale {{ game.potentialPoints() }} pts</span>
+              }
+              <span class="badge badge-mode">
+                {{ game.difficulty() === 'hard' ? '🌫️ Difícil' : '😌 Normal' }}
+              </span>
+              @if (game.countrySet() === 'worldcup') {
+                <span class="badge badge-copa">🏆 Copa 2026</span>
+              }
             }
           </div>
 
@@ -202,7 +252,7 @@
             }
 
             <button type="button" class="btn btn-ghost" (click)="game.reveal()">
-              Não sei — revelar resposta
+              {{ game.dailyActive() ? 'Pular esta bandeira ⏭️' : 'Não sei — revelar resposta' }}
             </button>
           } @else {
             <!-- RESULTADO -->
@@ -238,10 +288,16 @@
                 }
               </div>
 
-              <button type="button" class="btn btn-primary btn-lg" (click)="next()">
-                Próximo país →
-              </button>
+              <div class="result-actions">
+                <button type="button" class="btn btn-primary btn-lg" (click)="next()">
+                  Próximo país →
+                </button>
+                <button type="button" class="btn btn-share" (click)="shareScore()">
+                  {{ shareCopied() ? '✅ Copiado!' : '📲 Compartilhar' }}
+                </button>
+              </div>
             </div>
+          }
           }
         </section>
       }
