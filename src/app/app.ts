@@ -1,6 +1,8 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Difficulty, GameService } from './services/game.service';
+import { ConsentService } from './services/consent.service';
+import { SITE } from './site-config';
 
 @Component({
   selector: 'app-root',
@@ -10,6 +12,10 @@ import { Difficulty, GameService } from './services/game.service';
 })
 export class App {
   readonly game = inject(GameService);
+  readonly consent = inject(ConsentService);
+
+  /** Configurações do site (redes sociais, doação). */
+  readonly site = SITE;
 
   /** Dificuldade escolhida na tela inicial (antes de começar). */
   readonly chosen = signal<Difficulty>('normal');
@@ -19,6 +25,11 @@ export class App {
   readonly timed = signal(false);
   /** Texto digitado pelo jogador. */
   readonly guessText = signal('');
+
+  /** Controla o modal de doação. */
+  readonly showDonate = signal(false);
+  /** Feedback "copiado!" ao copiar a chave PIX. */
+  readonly pixCopied = signal(false);
 
   start(): void {
     this.game.newGame({
@@ -50,6 +61,26 @@ export class App {
 
   flagUrl(code: string): string {
     return `flags/${code}.svg`;
+  }
+
+  openDonate(): void {
+    this.pixCopied.set(false);
+    this.showDonate.set(true);
+  }
+
+  closeDonate(): void {
+    this.showDonate.set(false);
+  }
+
+  async copyPix(): Promise<void> {
+    const key = this.site.donation.pixKey;
+    if (!key) return;
+    try {
+      await navigator.clipboard.writeText(key);
+      this.pixCopied.set(true);
+    } catch {
+      this.pixCopied.set(false);
+    }
   }
 
   formatArea(area: number): string {

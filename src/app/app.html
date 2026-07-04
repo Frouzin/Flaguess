@@ -249,6 +249,79 @@
   </main>
 
   <footer class="foot">
-    Feito com Angular • dados e bandeiras offline • bandeiras de domínio público (flagcdn)
+    <nav class="foot-links">
+      @if (site.donation.pixKey || site.donation.kofi) {
+        <button type="button" class="foot-link" (click)="openDonate()">❤️ Apoiar</button>
+      }
+      @if (site.social.github) {
+        <a class="foot-link" [href]="site.social.github" target="_blank" rel="noopener">
+          GitHub
+        </a>
+      }
+      @if (site.social.linkedin) {
+        <a class="foot-link" [href]="site.social.linkedin" target="_blank" rel="noopener">
+          LinkedIn
+        </a>
+      }
+      <a class="foot-link" href="/privacidade.html" target="_blank" rel="noopener">
+        Privacidade
+      </a>
+    </nav>
+    <p class="foot-note">
+      Feito com Angular • dados e bandeiras offline • bandeiras de domínio público (flagcdn)
+    </p>
   </footer>
+
+  <!-- ============ CONSENTIMENTO (LGPD) ============ -->
+  @if (consent.decision() === 'pending') {
+    <div class="consent" role="dialog" aria-label="Aviso de privacidade e cookies">
+      <p class="consent-text">
+        🍪 Guardamos seus recordes no navegador e, futuramente, podemos exibir anúncios para
+        manter o Flaguess gratuito.
+        <a href="/privacidade.html" target="_blank" rel="noopener">Saiba mais</a>.
+      </p>
+      <div class="consent-actions">
+        <button type="button" class="btn-consent ghost" (click)="consent.reject()">Rejeitar</button>
+        <button type="button" class="btn-consent ok" (click)="consent.accept()">Aceitar</button>
+      </div>
+    </div>
+  }
+
+  <!-- ============ MODAL DE DOAÇÃO ============ -->
+  @if (showDonate()) {
+    <div class="modal-overlay" (click)="closeDonate()">
+      <div
+        class="modal"
+        role="dialog"
+        aria-label="Apoiar o Flaguess"
+        (click)="$event.stopPropagation()"
+      >
+        <button type="button" class="modal-close" (click)="closeDonate()" aria-label="Fechar">
+          ×
+        </button>
+        <h3 class="modal-title">❤️ Apoiar o Flaguess</h3>
+        <p class="modal-sub">
+          O jogo é 100% gratuito. Se ele te divertiu, você pode ajudar a manter o projeto no ar:
+        </p>
+
+        @if (site.donation.pixKey) {
+          <div class="pix-box">
+            <span class="pix-label">
+              Chave PIX@if (site.donation.pixName) { — {{ site.donation.pixName }} }
+            </span>
+            <code class="pix-key">{{ site.donation.pixKey }}</code>
+          </div>
+          <button type="button" class="btn btn-primary" (click)="copyPix()">
+            {{ pixCopied() ? '✅ Chave copiada!' : 'Copiar chave PIX' }}
+          </button>
+        }
+
+        @if (site.donation.kofi) {
+          <a class="btn btn-ghost donate-kofi" [href]="site.donation.kofi" target="_blank" rel="noopener">
+            ☕ Apoiar no Ko-fi
+          </a>
+        }
+      </div>
+    </div>
+  }
 </div>
