@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Como jogar — Flaguess</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Aprenda a jogar o Flaguess: regras, sistema de dicas e pontuação, níveis de dificuldade, modos de jogo (Copa, Estados, Capitais, continentes) e o Desafio do dia." />
+    <meta name="theme-color" content="#2E6FE0" />
+    <link rel="canonical" href="https://flaguess.com.br/como-jogar.html" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <style>
+      :root {
+        --bg: #0f172a;
+        --bg-2: #1e1b4b;
+        --card: rgba(255, 255, 255, 0.06);
+        --card-border: rgba(255, 255, 255, 0.12);
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #22d3ee;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 15% -10%, #312e81 0%, transparent 55%),
+          radial-gradient(1000px 700px at 110% 10%, #0e7490 0%, transparent 50%),
+          linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.65;
+      }
+      .wrap { max-width: 720px; margin: 0 auto; padding: clamp(1.25rem, 4vw, 2.5rem); }
+      .home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #fff;
+        padding: 6px 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+        margin-bottom: 1.5rem;
+      }
+      .home img { height: 30px; display: block; }
+      h1 { font-size: clamp(1.6rem, 5vw, 2.2rem); margin: 0 0 0.25rem; }
+      h2 { font-size: 1.15rem; margin: 2rem 0 0.5rem; color: var(--accent); }
+      h3 { font-size: 1rem; margin: 1.25rem 0 0.35rem; }
+      .updated { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.5rem; }
+      p, li { color: #dbe4f0; }
+      a { color: var(--accent); }
+      ul { padding-left: 1.2rem; }
+      li { margin: 0.25rem 0; }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 1rem;
+      }
+      .cta {
+        display: inline-block;
+        margin-top: 1.5rem;
+        background: linear-gradient(135deg, #6366f1, #22d3ee);
+        color: #fff;
+        font-weight: 700;
+        text-decoration: none;
+        padding: 0.7rem 1.4rem;
+        border-radius: 12px;
+      }
+      code { background: rgba(255, 255, 255, 0.08); padding: 0.1rem 0.35rem; border-radius: 6px; }
+      footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
+      footer a { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="home" href="/" aria-label="Voltar ao Flaguess">
+        <img src="/flaguess-logo-horizontal.svg" alt="Flaguess" />
+      </a>
+
+      <h1>Como jogar o Flaguess</h1>
+      <p class="updated">Guia completo das regras, dicas e modos de jogo</p>
+
+      <div class="card">
+        <p>
+          O <strong>Flaguess</strong> é um jogo gratuito em que você olha para uma bandeira e
+          tenta adivinhar a que país (ou estado) ela pertence. É simples de começar e vale tanto
+          para quem quer se divertir quanto para quem quer <strong>aprender bandeiras de verdade</strong>.
+          Este guia explica tudo: como funciona uma rodada, como ganhar mais pontos e quais são os
+          modos de jogo disponíveis.
+        </p>
+
+        <h2>🎯 O objetivo</h2>
+        <p>
+          Em cada rodada aparece uma bandeira misteriosa. Sua missão é digitar o nome correto
+          antes de esgotar as tentativas. Quanto mais bandeiras você acertar seguidas, maior fica
+          a sua <strong>sequência</strong> — e maior a sensação de que você realmente domina o mapa-múndi.
+        </p>
+
+        <h2>🕹️ Uma rodada, passo a passo</h2>
+        <ul>
+          <li>Observe a bandeira que aparece no centro da tela.</li>
+          <li>Digite o nome do país no campo de resposta. Um <strong>autocomplete</strong> sugere
+            os nomes válidos enquanto você digita, então não precisa se preocupar com acentos.</li>
+          <li>Acertou? Você marca pontos e vai para a próxima. Errou? Não tem problema:
+            <strong>cada erro revela uma nova dica</strong> para te ajudar.</li>
+          <li>Se travar de vez, é só clicar em <em>"Não sei — revelar resposta"</em> para ver
+            qual era a bandeira e seguir o jogo.</li>
+        </ul>
+
+        <h2>💡 Dicas e pontuação</h2>
+        <p>
+          Aqui está o coração do jogo: <strong>quanto menos dicas você usar, mais pontos leva</strong>.
+        </p>
+        <ul>
+          <li>Acertar de primeira, sem nenhuma dica, vale <strong>100 pontos</strong>.</li>
+          <li>Cada dica revelada reduz o valor da rodada em <strong>15 pontos</strong>.</li>
+          <li>O mínimo garantido por um acerto é <strong>20 pontos</strong> — errar bastante nunca
+            zera sua recompensa.</li>
+        </ul>
+        <p>
+          As dicas aparecem em ordem, da mais geral para a mais específica: continente, hemisfério,
+          região, idiomas oficiais, se o país tem ou não litoral, moeda, capital e, por fim, a
+          primeira letra com o número de letras do nome. Ou seja: dá para acertar quase qualquer
+          bandeira se tiver paciência para ler as pistas.
+        </p>
+
+        <h2>🌫️ Níveis de dificuldade</h2>
+        <h3>😌 Normal</h3>
+        <p>A bandeira aparece nítida. Ideal para aprender e para quem está começando.</p>
+        <h3>🌫️ Difícil</h3>
+        <p>
+          A bandeira começa <strong>borrada</strong> e vai ficando mais nítida a cada dica que você
+          desbloqueia — mas, em compensação, <strong>todos os pontos valem em dobro</strong>. É o
+          modo dos especialistas em vexilologia (o estudo das bandeiras).
+        </p>
+
+        <h2>🗺️ Modos de jogo</h2>
+        <p>Além do jogo padrão com os 194 países, você pode combinar diferentes modos no menu inicial:</p>
+        <ul>
+          <li><strong>🏆 Modo Copa</strong> — só as 48 seleções classificadas para a Copa do Mundo de 2026.</li>
+          <li><strong>🗺️ Estados do Brasil</strong> — as bandeiras dos 26 estados e do Distrito Federal.</li>
+          <li><strong>🏛️ Modo Capitais</strong> — em vez do nome do país, você adivinha a <strong>capital</strong>.
+            Combina com qualquer conjunto (dá para treinar "capitais da Europa", por exemplo).</li>
+          <li><strong>🌍 Filtro por continente</strong> — jogue só com um continente por vez:
+            África, Américas, Ásia, Europa ou Oceania.</li>
+          <li><strong>⏱️ Contra o tempo</strong> — você tem 30 segundos por rodada, e responder rápido
+            rende um <strong>bônus de velocidade</strong> em cima da pontuação.</li>
+        </ul>
+
+        <h2>🗓️ Desafio do dia</h2>
+        <p>
+          Todo dia o Flaguess sorteia <strong>5 bandeiras iguais para todo mundo</strong>. Você joga
+          uma vez por dia e, ao final, ganha um resultado em emojis (🟩 acertou de primeira, 🟨 acertou
+          com dica, ⬛ pulou) que dá para <strong>compartilhar no WhatsApp e nas redes</strong> — no
+          melhor estilo Wordle. É a forma perfeita de desafiar os amigos: todos jogam as mesmas
+          bandeiras e comparam os resultados.
+        </p>
+
+        <h2>🏅 Seus recordes</h2>
+        <p>
+          O jogo guarda automaticamente sua <strong>melhor pontuação</strong>, sua <strong>maior
+          sequência</strong> e o <strong>total de acertos</strong>. Tudo fica salvo apenas no seu
+          navegador — nada é enviado para servidores. Você pode zerar seus recordes quando quiser
+          pelo botão no rodapé do menu.
+        </p>
+
+        <h2>🧠 Dica de mestre: como decorar bandeiras</h2>
+        <p>
+          Não tente decorar todas de uma vez. Comece por um continente usando o filtro, associe cada
+          bandeira a uma história ou curiosidade (cores, símbolos, países vizinhos) e use o modo
+          Difícil só depois de dominar o Normal. Jogar o Desafio do dia todos os dias também ajuda a
+          fixar aos poucos, sem cansar.
+        </p>
+
+        <a class="cta" href="/">🚩 Começar a jogar agora</a>
+      </div>
+
+      <footer>
+        <a href="/">← Voltar para o Flaguess</a>
+        <a href="/termos.html">Termos de Uso</a>
+        <a href="/privacidade.html">Privacidade</a>
+      </footer>
+    </div>
+  </body>
+</html>
