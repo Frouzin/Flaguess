@@ -1,0 +1,9 @@
+# Flaguess — ads.txt  (https://flaguess.com.br/ads.txt)
+#
+# Autoriza quem pode vender o inventário de anúncios do site (IAB ads.txt).
+# Ao ser aprovado no Google AdSense, descomente a linha abaixo e troque
+# pub-0000000000000000 pelo seu ID de editor (aparece no painel do AdSense,
+# em "Conta"). Sem essa linha ativa, o AdSense mostra apenas um aviso — não
+# há prejuízo enquanto os anúncios ainda não estão no ar.
+#
+# google.com, pub-0000000000000000, DIRECT, f08c47fec0942fa0

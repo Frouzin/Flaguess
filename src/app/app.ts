@@ -9,11 +9,12 @@ import {
   GameService,
 } from './services/game.service';
 import { ConsentService } from './services/consent.service';
+import { AdSlot } from './components/ad-slot/ad-slot';
 import { SITE } from './site-config';
 
 @Component({
   selector: 'app-root',
-  imports: [FormsModule],
+  imports: [FormsModule, AdSlot],
   templateUrl: './app.html',
   styleUrl: './app.scss',
 })

@@ -22,4 +22,25 @@ export const SITE = {
     /** Link do Ko-fi / Buy me a coffee (opcional). */
     kofi: '',
   },
+
+  /**
+   * Google AdSense — fonte única da verdade para anúncios.
+   *
+   * Deixe `client` vazio ('') para manter TUDO DESLIGADO: nenhum script é
+   * carregado e nenhum anúncio aparece (em produção não renderiza nada; em
+   * desenvolvimento mostra apenas um placeholder para você ver a posição).
+   *
+   * Ao ser aprovado no AdSense: preencha `client` com o seu ID de editor
+   * ("ca-pub-XXXXXXXXXXXXXXXX") e cada `slots.*` com o ID do bloco de anúncio
+   * (data-ad-slot) criado no painel. Ver MONETIZACAO.md.
+   */
+  ads: {
+    /** ID do editor AdSense (ca-pub-...). Vazio = anúncios desligados. */
+    client: '',
+    /** IDs dos blocos de anúncio (data-ad-slot) por posição na tela. */
+    slots: {
+      /** Banner horizontal acima do rodapé. */
+      footer: '',
+    },
+  },
 };

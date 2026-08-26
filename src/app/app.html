@@ -389,6 +389,9 @@
     }
   </main>
 
+  <!-- Anúncio (inerte até preencher SITE.ads.client em site-config.ts) -->
+  <app-ad-slot [slot]="site.ads.slots.footer" />
+
   <footer class="foot">
     <nav class="foot-links">
       @if (site.donation.pixKey || site.donation.kofi) {
