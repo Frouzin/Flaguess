@@ -181,6 +181,24 @@
           Começar a jogar →
         </button>
 
+        @if (game.hallOfFame().length) {
+          <section class="hall">
+            <h3 class="hall-title">🏅 Hall da Fama</h3>
+            <ol class="hall-list">
+              @for (r of game.hallOfFame(); track $index; let i = $index) {
+                <li class="hall-row">
+                  <span class="hall-rank">{{ hallMedal(i) }}</span>
+                  <span class="hall-info">
+                    <span class="hall-score">{{ r.score }} pts</span>
+                    <span class="hall-mode">{{ r.label }}</span>
+                  </span>
+                  <span class="hall-meta">🔥 {{ r.streak }} · {{ r.solved }} ✔</span>
+                </li>
+              }
+            </ol>
+          </section>
+        }
+
         <p class="menu-foot">
           194 países • 48 na Copa • 27 estados do Brasil
           @if (game.gamesPlayed() > 0) {

@@ -53,6 +53,17 @@ export interface GameOptions {
   continent: Continent;
 }
 
+/** Uma partida concluída do modo livre, guardada no Hall da Fama (ranking local). */
+export interface RunRecord {
+  score: number;
+  streak: number;
+  solved: number;
+  /** Rótulo curto do modo (ex.: "🌎 Mundo 🌫️ ⏱️"). */
+  label: string;
+  /** Timestamp (ms) do fim da partida — também serve de id na lista. */
+  date: number;
+}
+
 /** Remove acentos/pontuação e normaliza para comparar respostas. */
 export function normalize(value: string): string {
   return value
@@ -75,6 +86,8 @@ const STORAGE_KEY = 'flaguess.stats.v1';
 const DAILY_KEY = 'flaguess.daily.v1';
 const DAILY_SIZE = 5; // bandeiras por Desafio do dia
 const DAILY_EPOCH = Date.UTC(2025, 0, 1); // dia 1 do Flaguess
+const HALL_KEY = 'flaguess.halloffame.v1';
+const HALL_MAX = 5; // quantas partidas o Hall da Fama guarda
 
 @Injectable({ providedIn: 'root' })
 export class GameService {
@@ -108,6 +121,9 @@ export class GameService {
   readonly lifetimeSolved = signal(0);
   readonly gamesPlayed = signal(0);
 
+  /** Hall da Fama: melhores partidas do modo livre (persistido no localStorage). */
+  readonly hallOfFame = signal<RunRecord[]>([]);
+
   // ---- Desafio do dia ----
   readonly dailyActive = signal(false);
   readonly dailyNumber = signal(0);
@@ -128,10 +144,13 @@ export class GameService {
   );
 
   private recent: string[] = [];
+  /** Evita registrar a mesma partida duas vezes no Hall da Fama. */
+  private currentRunBanked = false;
   private timerId: ReturnType<typeof setInterval> | null = null;
 
   constructor() {
     this.loadStats();
+    this.loadHall();
     this.dailyNumber.set(this.computeDailyNumber());
     this.initDailyStatus();
   }
@@ -257,6 +276,7 @@ export class GameService {
 
   // ---- Ações ----
   newGame(opts: GameOptions): void {
+    this.finishRun(); // registra a partida anterior no Hall da Fama, se houver
     this.dailyActive.set(false);
     this.difficulty.set(opts.difficulty);
     this.countrySet.set(opts.countrySet);
@@ -268,6 +288,7 @@ export class GameService {
     this.bestStreak.set(0);
     this.round.set(0);
     this.solved.set(0);
+    this.currentRunBanked = false;
     this.recent = [];
     this.gamesPlayed.update((n) => n + 1);
     this.persistStats();
@@ -351,6 +372,7 @@ export class GameService {
   // ---- Desafio do dia ----
   /** Inicia (ou reabre) o desafio de hoje. Se já concluído, mostra o resultado. */
   startDaily(): void {
+    this.finishRun(); // banca uma partida livre em andamento, se houver
     this.stopTimer();
     const day = this.computeDailyNumber();
     this.dailyNumber.set(day);
@@ -482,7 +504,49 @@ export class GameService {
     this.recordStreak.set(0);
     this.lifetimeSolved.set(0);
     this.gamesPlayed.set(0);
+    this.hallOfFame.set([]);
     this.persistStats();
+    this.persistHall();
+  }
+
+  /**
+   * Registra a partida livre atual no Hall da Fama (top {@link HALL_MAX} por
+   * pontos). Chamado ao voltar ao menu ou iniciar outra partida. Ignora o
+   * Desafio do dia, partidas sem acertos e partidas já registradas.
+   */
+  finishRun(): void {
+    if (this.currentRunBanked || this.dailyActive() || this.solved() === 0) {
+      return;
+    }
+    const record: RunRecord = {
+      score: this.score(),
+      streak: this.bestStreak(),
+      solved: this.solved(),
+      label: this.runLabel(),
+      date: Date.now(),
+    };
+    const list = [...this.hallOfFame(), record]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, HALL_MAX);
+    this.hallOfFame.set(list);
+    this.persistHall();
+    this.currentRunBanked = true;
+  }
+
+  /** Rótulo curto do modo da partida, para exibir no Hall da Fama. */
+  private runLabel(): string {
+    const set = this.countrySet();
+    const parts: string[] = [
+      set === 'worldcup' ? '🏆 Copa' : set === 'brazil' ? '🗺️ Estados' : '🌎 Mundo',
+    ];
+    if (set === 'all' && this.continent() !== 'all') {
+      const c = CONTINENTS.find((x) => x.value === this.continent());
+      if (c) parts.push(c.emoji);
+    }
+    if (this.capitals()) parts.push('🏛️');
+    if (this.difficulty() === 'hard') parts.push('🌫️');
+    if (this.timed()) parts.push('⏱️');
+    return parts.join(' ');
   }
 
   private loadStats(): void {
@@ -512,6 +576,37 @@ export class GameService {
       );
     } catch {
       // localStorage indisponível (ex.: navegação privada com cota zero)
+    }
+  }
+
+  private loadHall(): void {
+    try {
+      const raw = localStorage.getItem(HALL_KEY);
+      if (!raw) return;
+      const arr = JSON.parse(raw);
+      if (!Array.isArray(arr)) return;
+      const clean = arr
+        .filter((r) => r && typeof r.score === 'number')
+        .map((r) => ({
+          score: Number(r.score) || 0,
+          streak: Number(r.streak) || 0,
+          solved: Number(r.solved) || 0,
+          label: typeof r.label === 'string' ? r.label : '',
+          date: Number(r.date) || 0,
+        }))
+        .sort((a, b) => b.score - a.score)
+        .slice(0, HALL_MAX);
+      this.hallOfFame.set(clean);
+    } catch {
+      // ignora dados corrompidos / localStorage indisponível
+    }
+  }
+
+  private persistHall(): void {
+    try {
+      localStorage.setItem(HALL_KEY, JSON.stringify(this.hallOfFame()));
+    } catch {
+      // localStorage indisponível — ignora.
     }
   }
 

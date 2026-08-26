@@ -106,8 +106,14 @@ export class App {
 
   backToMenu(): void {
     this.guessText.set('');
+    this.game.finishRun(); // registra a partida no Hall da Fama antes de sair
     this.game.dailyActive.set(false);
     this.game.status.set('idle');
+  }
+
+  /** Medalha (top 3) ou posição numérica de uma linha do Hall da Fama. */
+  hallMedal(i: number): string {
+    return ['🥇', '🥈', '🥉'][i] ?? `${i + 1}º`;
   }
 
   flagUrl(code: string): string {
