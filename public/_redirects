@@ -1,0 +1,4 @@
+# Cloudflare Pages — fallback de SPA.
+# Arquivos estáticos existentes (index.html, /flags/*, *.html) são servidos
+# direto; qualquer outro caminho cai no app. Ignorado pela Vercel.
+/*    /index.html   200
