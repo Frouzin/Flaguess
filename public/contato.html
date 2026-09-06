@@ -1,0 +1,157 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>Contato — Flaguess</title>
+    <base href="/" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Fale com o Flaguess: sugestões, correções de bandeiras ou dados, parcerias e reporte de erros. Veja os canais de contato do projeto."
+    />
+    <meta name="theme-color" content="#2E6FE0" />
+    <link rel="canonical" href="https://flaguess.com.br/contato.html" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Flaguess" />
+    <meta property="og:title" content="Contato — Flaguess" />
+    <meta property="og:description" content="Sugestões, correções e parcerias: fale com o Flaguess." />
+    <meta property="og:url" content="https://flaguess.com.br/contato.html" />
+    <meta property="og:image" content="https://flaguess.com.br/flaguess-icon-512.png" />
+
+    <style>
+      :root {
+        --bg: #0f172a;
+        --bg-2: #1e1b4b;
+        --card: rgba(255, 255, 255, 0.06);
+        --card-border: rgba(255, 255, 255, 0.12);
+        --text: #f1f5f9;
+        --muted: #94a3b8;
+        --accent: #22d3ee;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        color: var(--text);
+        background:
+          radial-gradient(1200px 600px at 15% -10%, #312e81 0%, transparent 55%),
+          radial-gradient(1000px 700px at 110% 10%, #0e7490 0%, transparent 50%),
+          linear-gradient(160deg, var(--bg) 0%, var(--bg-2) 100%);
+        background-attachment: fixed;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.65;
+      }
+      .wrap { max-width: 640px; margin: 0 auto; padding: clamp(1.25rem, 4vw, 2.5rem); }
+      .home {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        background: #fff;
+        padding: 6px 12px;
+        border-radius: 12px;
+        text-decoration: none;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.28);
+        margin-bottom: 1.5rem;
+      }
+      .home img { height: 30px; display: block; }
+      h1 { font-size: clamp(1.6rem, 5vw, 2.3rem); margin: 0 0 0.35rem; line-height: 1.2; }
+      .updated { color: var(--muted); font-size: 0.85rem; margin: 0 0 1.5rem; }
+      p, li { color: #dbe4f0; }
+      a { color: var(--accent); }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--card-border);
+        border-radius: 16px;
+        padding: 1.25rem 1.5rem;
+        margin-top: 1rem;
+      }
+      .lead { font-size: 1.05rem; }
+      .channels { list-style: none; padding: 0; margin: 1.25rem 0 0; }
+      .channels li { margin: 0.6rem 0; }
+      .channel {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        background: rgba(255, 255, 255, 0.04);
+        border: 1px solid var(--card-border);
+        border-radius: 12px;
+        padding: 0.85rem 1rem;
+        text-decoration: none;
+        color: var(--text);
+        transition: border-color 0.15s ease, transform 0.15s ease;
+      }
+      .channel:hover { border-color: var(--accent); transform: translateY(-2px); }
+      .channel .ic { font-size: 1.4rem; }
+      .channel .t { display: flex; flex-direction: column; }
+      .channel .t b { font-size: 1rem; }
+      .channel .t span { color: var(--muted); font-size: 0.88rem; }
+      footer { margin-top: 2.5rem; color: var(--muted); font-size: 0.8rem; display: flex; flex-wrap: wrap; gap: 0.35rem 1rem; }
+      footer a { color: var(--muted); }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <a class="home" href="/" aria-label="Voltar ao Flaguess">
+        <img src="/flaguess-logo-horizontal.svg" alt="Flaguess" />
+      </a>
+
+      <h1>Contato</h1>
+      <p class="updated">Sugestões, correções, parcerias — toda mensagem é bem-vinda.</p>
+
+      <div class="card">
+        <p class="lead">
+          O Flaguess é um projeto independente e está sempre melhorando com a ajuda de quem joga.
+          Encontrou uma bandeira ou um dado errado? Tem uma ideia de novo modo ou de artigo?
+          Quer falar sobre parceria? Use um dos canais abaixo:
+        </p>
+
+        <ul class="channels">
+          <li>
+            <a class="channel" href="https://github.com/Frouzin/Flaguess/issues" target="_blank" rel="noopener">
+              <span class="ic">🐙</span>
+              <span class="t">
+                <b>GitHub — reportar um erro</b>
+                <span>Abra uma issue para bugs, bandeiras erradas ou sugestões técnicas.</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="channel" href="https://github.com/Frouzin" target="_blank" rel="noopener">
+              <span class="ic">💻</span>
+              <span class="t">
+                <b>GitHub — perfil do criador</b>
+                <span>Veja outros projetos de Matheus Reis (Frouzin).</span>
+              </span>
+            </a>
+          </li>
+          <li>
+            <a class="channel" href="https://linkedin.com/in/matheusreisdev" target="_blank" rel="noopener">
+              <span class="ic">🔗</span>
+              <span class="t">
+                <b>LinkedIn</b>
+                <span>Para parcerias e assuntos profissionais.</span>
+              </span>
+            </a>
+          </li>
+        </ul>
+
+        <p style="margin-top: 1.5rem;">
+          Respondemos assim que possível. Para dúvidas sobre como o jogo trata seus dados,
+          consulte a <a href="/privacidade.html">Política de Privacidade</a>.
+        </p>
+      </div>
+
+      <footer>
+        <a href="/">← Voltar para o Flaguess</a>
+        <a href="/sobre.html">Sobre</a>
+        <a href="/artigos.html">Artigos</a>
+        <a href="/como-jogar.html">Como jogar</a>
+        <a href="/termos.html">Termos de Uso</a>
+        <a href="/privacidade.html">Privacidade</a>
+      </footer>
+    </div>
+  </body>
+</html>

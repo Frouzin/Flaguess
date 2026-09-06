@@ -49,9 +49,85 @@
           SITE.ads.client estiver preenchido e o usuário aceitar o consentimento.)
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXXXXXXXXXXXXXX" crossorigin="anonymous"></script>
     -->
+
+    <!-- Estilo da tela inicial estática (conteúdo que o Angular substitui pelo jogo,
+         e que rastreadores/leitores sem JavaScript enxergam). -->
+    <style>
+      #seo-fallback {
+        min-height: 100dvh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem;
+        color: #f1f5f9;
+        background:
+          radial-gradient(1200px 600px at 15% -10%, #312e81 0%, transparent 55%),
+          radial-gradient(1000px 700px at 110% 10%, #0e7490 0%, transparent 50%),
+          linear-gradient(160deg, #0f172a 0%, #1e1b4b 100%);
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        line-height: 1.6;
+      }
+      #seo-fallback .seo-card { max-width: 640px; width: 100%; }
+      #seo-fallback .seo-logo { height: 44px; width: auto; display: block; margin: 0 0 1.25rem; }
+      #seo-fallback .seo-loading { color: #94a3b8; font-size: .95rem; display: flex; align-items: center; gap: .5rem; margin: 0 0 1.5rem; }
+      #seo-fallback .seo-loading .dot { width: 10px; height: 10px; border-radius: 50%; background: #22d3ee; animation: seo-pulse 1s ease-in-out infinite; }
+      @keyframes seo-pulse { 0%, 100% { opacity: .3; } 50% { opacity: 1; } }
+      #seo-fallback h1 { font-size: clamp(1.5rem, 5vw, 2.1rem); margin: 0 0 .6rem; line-height: 1.2; }
+      #seo-fallback h2 { font-size: 1.15rem; color: #22d3ee; margin: 1.5rem 0 .5rem; }
+      #seo-fallback .seo-lead { font-size: 1.05rem; color: #dbe4f0; }
+      #seo-fallback p { color: #dbe4f0; margin: .5rem 0; }
+      #seo-fallback ul { padding-left: 1.2rem; margin: .5rem 0; }
+      #seo-fallback li { margin: .35rem 0; color: #dbe4f0; }
+      #seo-fallback a { color: #22d3ee; }
+      #seo-fallback .seo-links { margin-top: 1.5rem; font-size: .95rem; }
+    </style>
   </head>
   <body>
-    <app-root></app-root>
+    <app-root>
+      <!-- Conteúdo inicial: aparece enquanto o jogo carrega e é o que rastreadores
+           e navegadores sem JavaScript leem. O Angular substitui tudo isto pelo
+           jogo assim que inicializa. -->
+      <div id="seo-fallback">
+        <div class="seo-card">
+          <img class="seo-logo" src="/flaguess-logo-horizontal.svg" alt="Flaguess" width="220" height="44" />
+          <p class="seo-loading"><span class="dot"></span> Carregando o jogo…</p>
+
+          <h1>Flaguess — adivinhe o país pela bandeira</h1>
+          <p class="seo-lead">
+            Flaguess é um jogo gratuito, em português, para testar e treinar seus
+            conhecimentos de geografia. Olhe a bandeira, digite o nome do país e, a cada
+            tentativa errada, uma nova dica aparece — quanto menos dicas você usar, mais
+            pontos leva.
+          </p>
+
+          <h2>Modos de jogo</h2>
+          <ul>
+            <li><strong>Mundo todo:</strong> as 194 bandeiras nacionais, com filtro por continente.</li>
+            <li><strong>🏆 Modo Copa:</strong> só as 48 seleções da Copa do Mundo de 2026.</li>
+            <li><strong>🗺️ Estados do Brasil:</strong> as 26 bandeiras estaduais e a do Distrito Federal.</li>
+            <li><strong>🏛️ Modo Capitais:</strong> em vez do país, adivinhe a capital.</li>
+            <li><strong>⏱️ Contra o tempo:</strong> 30 segundos por rodada, com bônus de velocidade.</li>
+            <li><strong>🗓️ Desafio do dia:</strong> 5 bandeiras iguais para todo mundo, com resultado para compartilhar.</li>
+            <li><strong>🌫️ Modo Difícil:</strong> a bandeira começa borrada e revela os detalhes aos poucos.</li>
+          </ul>
+
+          <h2>Por que jogar</h2>
+          <p>
+            A cada acerto, o Flaguess mostra a capital, o continente, a moeda, os idiomas e a
+            área do país — então você aprende geografia de verdade enquanto se diverte. Seus
+            recordes ficam salvos no próprio navegador e há um Hall da Fama com as melhores
+            partidas.
+          </p>
+
+          <p class="seo-links">
+            Saiba mais: <a href="/como-jogar.html">Como jogar</a> ·
+            <a href="/artigos.html">Artigos sobre bandeiras</a> ·
+            <a href="/sobre.html">Sobre o Flaguess</a> ·
+            <a href="/contato.html">Contato</a>
+          </p>
+        </div>
+      </div>
+    </app-root>
 
     <!-- Vercel Web Analytics (anônimo, sem cookies). Requer "Analytics" ativado
          no painel do projeto na Vercel; localmente o script apenas retorna 404. -->
