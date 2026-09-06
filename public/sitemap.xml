@@ -41,6 +41,21 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://flaguess.com.br/bandeiras-africa.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flaguess.com.br/bandeiras-asia.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://flaguess.com.br/bandeiras-animais-simbolos.html</loc>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
     <loc>https://flaguess.com.br/sobre.html</loc>
     <changefreq>monthly</changefreq>
     <priority>0.5</priority>
